@@ -71,18 +71,25 @@ class ProfileController extends Controller
 
         }
 
-        $user->profile->updateOrCreate([],[
+        if (!$user->profile) {
+            $user->profile()->create();
+        }
+
+        $user->profile->update([
             'avatar' => $avatar,
             'bio' => $request->input('bio'),
             'blood_type' => $request->input('blood_type'),
             'location' => $request->input('location'),
         ]);
+
+        $user->profile->save();
+
         // Reload the user object to reflect the updated profile data
         $user->load('profile');
 
         return $this->successResponse([
             'profile' => ProfileResourse::make($user->profile),
-            'message' => 'Profile updated successfully'
+            'message' => 'Profiles updated successfully'
         ]);
     }
 

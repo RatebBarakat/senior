@@ -37,8 +37,27 @@ class Admin extends Authenticatable
 
     public function profile()
     {
-        return $this->hasOne(Profile::class, 'admin_id')
-            ->withDefault();
+        return $this->hasOne(Profile::class)->withDefault();
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role && $this->role->name == "super-admin";
+    }
+
+    public function hasPermission($name)
+    {
+        return $this->role && $this->role->permissions->contains('name', $name);
+    }
+
+    public function scopeNonSuperAdmins($query)
+    {
+        return $query->where(function($q) {
+            $q->whereDoesntHave('role')
+                ->orWhereHas('role', function($q) {
+                    $q->where('name', '<>', 'super-admin');
+                });
+        });
     }
     /**
      * The attributes that should be hidden for serialization.

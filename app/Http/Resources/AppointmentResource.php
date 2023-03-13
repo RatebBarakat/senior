@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 
 class AppointmentResource extends JsonResource
 {
@@ -14,13 +15,18 @@ class AppointmentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $this->load('center','center.location');
-        return [
-            'id' => $this->id,
-            'status' => $this->status,
-            'time' => $this->time,
-            'center' => CenterResource::make($this->center),
-            'lcoation' => $this->center->location
-        ];
+        $data = [];
+
+        if (!in_array($request->route()->getActionMethod(), ['index', 'show'])) {
+            $data['id'] = $this->id;
+        }
+
+        $data['status'] = $this->status;
+        $data['date'] = $this->date;
+        $data['time'] = $this->time;
+        $data['center'] = CenterResource::make($this->center);
+        $data['location'] = LocationResource::make($this->center->location);
+
+        return $data;
     }
 }

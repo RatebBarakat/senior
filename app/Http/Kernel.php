@@ -5,6 +5,7 @@ namespace App\Http;
 use App\Http\Middleware\adminCheck;
 use App\Http\Middleware\checkAdminGuest;
 use App\Http\Middleware\checkAuth;
+use App\Http\Middleware\isSuperAdmin;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -66,6 +67,7 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'superAdmin' => IsSuperAdmin::class,
         'api.guest' => checkAdminGuest::class,
         'api.user' => checkAuth::class,
         'api.admin' => adminCheck::class

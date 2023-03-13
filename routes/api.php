@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\SocialLoginController;
 use Illuminate\Http\Request;
@@ -37,7 +38,13 @@ Route::middleware(['auth:sanctum','api.admin'])->group(function (){
     Route::apiResource('/users',UserController::class);
 });
 
-Route::middleware('auth:sanctum')->name('profile.')->group(function (){
-    Route::post('/profile/update',[ProfileController::class,'update'])->name('update');
-    Route::apiResource('/profile',ProfileController::class)->only('index');
+Route::middleware('auth:sanctum')->prefix('user')->name('user.')->group(function (){
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::post('/update',[ProfileController::class,'update'])->name('update');
+        Route::apiResource('',ProfileController::class)->only('index');
+    });
+
+    Route::name('appointment.')->group(function () {
+        Route::apiResource('/appointment',AppointmentController::class);
+    });
 });

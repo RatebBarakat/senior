@@ -50,18 +50,28 @@ class User extends Authenticatable
         $this->save();
     }
 
+    public function hasPermission($name)
+    {
+        return $this->role && $this->role->permissions->contains('name', $name);
+    }
+
     public function role(){
         return $this->belongsTo(Role::class);
     }
 
     public function profile()
     {
-        return $this->hasOne(Profile::class,'user_id')
-            ->withDefault();
+        return $this->hasOne(Profile::class,'user_id')->withDefault([
+            'user_id' => $this->id,
+        ]);
     }
 
     public function deviceTokens(){
         return $this->hasMany(DeviceToken::class);
+    }
+
+    public function appointments(){
+        return $this->hasMany(Appointment::class);
     }
 
     public function routeNotificationForFcm($driver, $notification = null)

@@ -24,10 +24,16 @@ class Social extends Authenticatable
         'provider_token',
     ];
 
+    public function hasPermission($name)
+    {
+        return $this->role && $this->role->permissions->contains('name', $name);
+    }
+
     public function profile()
     {
-        return $this->hasOne(Profile::class,'social_id')
-            ->withDefault();
+        return $this->hasOne(Profile::class,'social_id')->withDefault([
+            'social_id' => $this->id,
+        ]);
     }
 
     public function setProviderTokenAttribute($value){

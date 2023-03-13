@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 
 @section('title')
-    roles and permissions
+    admins
 @endsection
 
 @section('content')
-    @livewire('admin.roles-permissions')
+    @livewire('admin.super.admins')
 @endsection
 
 @push('js')

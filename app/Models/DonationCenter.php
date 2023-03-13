@@ -9,5 +9,18 @@ class DonationCenter extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','location_id'];
+    protected $fillable = ['name','location_id','admin_id'];
+
+    public function location(){
+        return $this->belongsTo(Location::class);
+    }
+
+    public function CenterAdmin(){
+        return $this->hasOne(Admin::class)->withDefault();
+    }
+
+    public function admin()
+    {
+        return $this->hasOne(Admin::class, 'id', 'admin_id');
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Permission;
+use Illuminate\Support\Facades\Cache;
 
 class PermissionObserver
 {
@@ -17,9 +18,9 @@ class PermissionObserver
     /**
      * Handle the Permission "updated" event.
      */
-    public function updated(Permission $permission): void
+    public function updated(Permission $permission) :void
     {
-        //
+        if (Cache::has('permissions'))Cache::delete('permissions');
     }
 
     /**
