@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Api\SocialLoginController;
 use App\Models\Role;
 use Illuminate\Support\Facades\Route;
@@ -44,4 +45,8 @@ Route::get('/login',function (){
 
 Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function (){
    Route::view('/','admin.dashboard')->name('index');
+   Route::prefix('location')->name('location.')->group(function (){
+       Route::view('/create','admin.create-location')->name('create');
+       Route::post('/create',[LocationController::class,'store'])->name('store');
+   });
 });
