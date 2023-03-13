@@ -13,4 +13,9 @@ class Appointment extends Model
     public function center(){
         return $this->belongsTo(DonationCenter::class);
     }
+
+    public function scopeScheduled($query)
+    {
+        return $query->where('status', 'scheduled');
+    }
 }
