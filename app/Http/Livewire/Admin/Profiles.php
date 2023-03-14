@@ -5,12 +5,15 @@ namespace App\Http\Livewire\Admin;
 use App\Models\Admin;
 use App\Models\Profile;
 use Illuminate\Support\Facades\Storage;
+use Lean\LivewireAccess\WithExplicitAccess;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 
 class Profiles extends Component
 {
-    use WithFileUploads;
+    use WithPagination,WithExplicitAccess,WithFileUploads;
+    #[BlockFrontendAccess]
 
     public string $name = "";
     public string $location = "";
@@ -18,6 +21,11 @@ class Profiles extends Component
     public \App\Models\Profile $profile;
     public $oldAvatar;
     public $newAvatar;
+
+    public function checkprofile() :bool{
+        $authId = Profile::where('id',auth()->guard('admin')->user()->id)->first();
+        return $authId === $this->profile->id;
+    }
 
     public function mount()
     {
@@ -43,6 +51,7 @@ class Profiles extends Component
 
     public function updateProfile()
     {
+        abort_if(!$this->checkprofile());
         $this->validate([
             'name' => 'required|string|min:2',
             'location' => 'nullable|string|min:2',

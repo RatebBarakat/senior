@@ -8,14 +8,16 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
+use Lean\LivewireAccess\WithImplicitAccess;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class Admins extends Component
 {
-    use WithPagination;
+    use WithPagination,WithImplicitAccess;
+    #[BlockFrontendAccess]
 
-    protected $paginationTheme = 'bootstrap';
+    public $paginationTheme = 'bootstrap';
     public ?Admin $admin = null;
     public $selectedAdmins = [];
     public ?int $admin_id = null;
@@ -30,10 +32,19 @@ class Admins extends Component
     public string $email = "";
     public string $search = "";
 
+    public function mount(){
+        if (!auth()->guard()->user()->isSuperAdmin())abort(403);
+    }
+
     public function render()
     {
+        $admins = Admin::when(!empty($this->search),function ($q){
+                    $q->where('name','like','%'.$this->search.'%')
+                    ->orWhere('email','like','%'.$this->search.'%');
+                })->nonSuperAdmins()->with('role')->paginate(abs($this->perPage));
+
         return view('livewire.admin.super.admins',[
-            'admins' => Admin::nonSuperAdmins()->with('role')->paginate(abs($this->perPage)),
+            'admins' => $admins,
             'roles' => Role::get()
         ]);
     }
@@ -58,6 +69,8 @@ class Admins extends Component
     }
 
     public function addAdmin(){
+        if (!Gate::allows('create-admins'))abort(403);
+
         $this->validate([
             'name' => 'required|string|min:2',
             'email' => 'required|email|unique:admins',
@@ -76,7 +89,7 @@ class Admins extends Component
             'password' => Hash::make($this->password),
             'role_id' => $this->role_id == null ? null : (int) $this->role_id
         ]);
-        $this->alert('success','center addedd successfully');
+        $this->alert('success','admin addedd successfully');
 
         $this->hideAddModal();
     }
@@ -87,22 +100,23 @@ class Admins extends Component
     }
 
     public function deleteAdmin(){
+        if (!Gate::allows('delete-admins'))abort(403);
 
-        if (!Gate::allows('delete-centers'))abort(403);
-
-        $admin = DonationAdmin::findOrFail($this->admin_id);
+        $admin = Admin::nonSuperAdmins()->findOrFail($this->admin_id);
         $admin->delete();
         $this->resetInputs();
         $this->dispatchBrowserEvent('hide-delete-modal');
-        $this->alert('success',"center deleted successfully");
+        $this->alert('success',"admin deleted successfully");
         $this->resetPage();
     }
 
     public function openEditModal(int $id){
         $this->admin_id = $id;
-        $this->center = DonationAdmin::with('location')->findOrFail($this->admin_id);
-        $this->name = $this->center->name;
-        $this->location_id = $this->center->location->id;
+        $admin = Admin::nonSuperAdmins()->with('role')->findOrFail($this->admin_id);
+        $this->admin = $admin;
+        $this->name = $admin->name;
+        $this->email = $admin->email;
+        $this->role_id = $admin->role->id;
         $this->dispatchBrowserEvent('open-edit-modal');
     }
 
@@ -111,20 +125,25 @@ class Admins extends Component
     }
 
     public function updateAdmin(){
+        if (!Gate::allows('update-admins'))abort(403);
+
         $this->validate([
             'name' => 'required|string|min:2',
-            'location_id' => ['required','integer',Rule::exists('locations', 'id')]
+            'email' => 'required|email|unique:admins,email,'.$this->admin_id,
+            'role_id' => ['required','integer',Rule::exists('roles', 'id')]
         ]);
-        $this->center->update([
+        $this->admin->update([
             'name' => $this->name,
-            'location_id' => $this->location_id
+            'email' => $this->email,
+            'role_id' => $this->role_id
         ]);
         $this->hideEditModal();
-        $this->alert('success',$this->center->name.'updated successfully');
+        $this->alert('success',$this->admin->name.'updated successfully');
         $this->resetInputs();
     }
 
     public function resetInputs(){
         $this->reset('name','email','password','passwordConfirm','role_id','search','admin','selectedAdmins');
     }
+
 }

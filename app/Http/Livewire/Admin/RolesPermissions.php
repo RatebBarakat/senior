@@ -7,16 +7,16 @@ use App\Models\Permission;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Lean\LivewireAccess\WithExplicitAccess;
+use Lean\LivewireAccess\WithImplicitAccess;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class RolesPermissions extends Component
 {
-    use WithPagination;
+    use WithPagination,WithImplicitAccess;
+    #[BlockFrontendAccess]
 
-    protected $listeners = [
-        'tableUpdate'
-    ];
     public ?Role $role = null;
     public $selectedPermissions = [];
     public int $role_id = 0;
@@ -26,6 +26,10 @@ class RolesPermissions extends Component
 //    public bool $isSelectedAll = false;
     public string $name = "";
     public string $search = "";
+
+    public function mount(){
+        if (!auth()->guard()->user()->isSuperAdmin())abort(403);
+    }
 
     public function render()
     {
@@ -61,6 +65,7 @@ class RolesPermissions extends Component
     }
 
     public function addRole(){
+        if (!Gate::allows('create-roles'))abort(403);
         $this->validate([
             'name' => 'required|string|min:2',
             'selectedPermissions' => 'required|min:1',
@@ -92,9 +97,7 @@ class RolesPermissions extends Component
         $this->dispatchBrowserEvent('open-delete-modal');
     }
     public function deleteRole(){
-
         if (!Gate::allows('delete-roles'))abort(403);
-
         $role = Role::findOrFail($this->role_id);
         if ($role->editable == 1){
             $role->delete();

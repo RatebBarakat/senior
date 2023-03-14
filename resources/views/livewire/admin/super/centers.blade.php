@@ -131,6 +131,16 @@
                                     </option>
                                 @endforeach
                             </select>
+
+                            <div class="form-group">
+                                <label for="admin-center">admin center</label>
+                                <select name="" id="" wire:model.defer="admin_id" class="custom-select">
+                                    <option value="{{null}}">select an admin</option>
+                                    @foreach($admins as $admin)
+                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         @endif
                     </div>
                     <div class="modal-footer">

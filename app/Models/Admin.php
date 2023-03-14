@@ -53,10 +53,9 @@ class Admin extends Authenticatable
     public function scopeNonSuperAdmins($query)
     {
         return $query->where(function($q) {
-            $q->whereDoesntHave('role')
-                ->orWhereHas('role', function($q) {
+            $q->WhereHas('role', function($q) {
                     $q->where('name', '<>', 'super-admin');
-                });
+            });
         });
     }
     /**

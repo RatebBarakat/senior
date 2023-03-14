@@ -9,12 +9,14 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Lean\LivewireAccess\WithImplicitAccess;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class Centers extends Component
 {
-    use WithPagination;
+    use WithPagination,WithImplicitAccess;
+    #[BlockFrontendAccess]
 
     public ?DonationCenter $center = null;
     public $selectedCenters = [];
@@ -22,12 +24,16 @@ class Centers extends Component
     public $admin_id = null;
     public int $locationFilter = 0;
     public int $location_id = 0;
-    protected $paginationTheme = 'bootstrap';
+    protected $paginationThضeme = 'bootstrap';
     public $perPage = 10;
 //    public array $selectedRoles = [];
 //    public bool $isSelectedAll = false;
     public string $name = "";
     public string $search = "";
+
+    public function mount(){
+        if (!auth()->guard()->user()->isSuperAdmin())abort(403);
+    }
 
     public function render()
     {
@@ -67,6 +73,7 @@ class Centers extends Component
     }
 
     public function addCenter(){
+        if (!Gate::allows('create-centers'))abort(403);
         $this->validate([
             'name' => 'required|string|min:2',
             'location_id' => ['required', 'integer',Rule::exists('locations', 'id')],
@@ -102,8 +109,9 @@ class Centers extends Component
 
     public function openEditModal(int $id){
         $this->center_id = $id;
-        $this->center = DonationCenter::with('location')->findOrFail($this->center_id);
+        $this->center = DonationCenter::with('location','admin')->findOrFail($this->center_id);
         $this->name = $this->center->name;
+        $this->admin_id = $this->center->admin->id;
         $this->location_id = $this->center->location->id;
         $this->dispatchBrowserEvent('open-edit-modal');
     }
@@ -113,13 +121,15 @@ class Centers extends Component
     }
 
     public function updateCenter(){
+        if (!Gate::allows('update-centers'))abort(403);
         $this->validate([
             'name' => 'required|string|min:2',
             'location_id' => ['required','integer',Rule::exists('locations', 'id')]
         ]);
         $this->center->update([
             'name' => $this->name,
-            'location_id' => $this->location_id
+            'location_id' => $this->location_id,
+            'admin_id' => $this->admin_id
         ]);
         $this->hideEditModal();
         $this->alert('success',$this->center->name.'updated successfully');

@@ -138,7 +138,6 @@
             </div>
         </div>
     </div>
-
     <div wire:ignore.self class="modal fade" tabindex="-1" role="dialog" id="deleteModal">
         @csrf
         <div class="modal-dialog" role="document">
@@ -161,5 +160,5 @@
             </div>
         </div>
     </div>
-
 </div>
+

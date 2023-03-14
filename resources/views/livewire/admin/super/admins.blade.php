@@ -1,7 +1,7 @@
 <div class="container-lg">
-    @can('create-centers')
+    @can('create-admins')
         <button wire:click="showAddModal" class="btn btn-success align-self-end float-right mb-1">
-            add center
+            add admin
         </button>
     @endcan
 
@@ -46,7 +46,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center"> no centers </td>
+                    <td colspan="7" class="text-admin"> no admins </td>
                 </tr>
             @endforelse
             </tbody>
@@ -54,11 +54,33 @@
         {{$admins->links()}}
     </div>
 
-    <div wire:ignore.self class="modal fade" tabindex="-1" center="dialog" id="addModal">
-        <div class="modal-dialog" center="document">
+    <div wire:ignore.self class="modal fade" tabindex="-1" admin="dialog" id="deleteModal">
+            <div class="modal-dialog" admin="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">delete admins</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>are you sure that you want to delete this admin?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <form action="" wire:submit.prevent="deleteAdmin" method="post">
+                            <button type="submit" wire:loading.attr="disabled" class="btn btn-danger">delete admin</button>
+                        </form>
+                        <button type="button" id="closeDeleteSelectedModal" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <div wire:ignore.self class="modal fade" tabindex="-1" admin="dialog" id="addModal">
+        <div class="modal-dialog" admin="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">add center</h5>
+                    <h5 class="modal-title">add admin</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                             wire:click="hideAddModal">
                         <span aria-hidden="true">&times;</span>
@@ -82,20 +104,20 @@
                         <div class="form-group">
                             <label for="">password</label>
                             <span class="text-danger">@error('password'){{$message}}@enderror</span>
-                            <input type="text" wire:model.defer="password" class="form-control">
+                            <input type="password" wire:model.defer="password" class="form-control">
                         </div>
 
                         <div class="form-group">
                             <label for="">password confirm</label>
                             <span class="text-danger">@error('passwordConfirm'){{$message}}@enderror</span>
-                            <input type="text" wire:model.defer="passwordConfirm" class="form-control">
+                            <input type="password" wire:model.defer="passwordConfirm" class="form-control">
                         </div>
 
                         <div class="form-group">
-                            <label for="admin-center">role</label>
+                            <label for="admin-admin">admin</label>
                             <span class="text-danger">@error('role_id'){{$message}}@enderror</span>
                             <select name="" id="" wire:model.defer="role_id" class="custom-select">
-                                <option value="">select a role</option>
+                                <option value="">select a admin</option>
                                 @foreach($roles as $role)
                                     <option value="{{$role->id}}">{{$role->name}}</option>
                                 @endforeach
@@ -112,8 +134,8 @@
         </div>
     </div>
 
-    <div wire:ignore.self class="modal fade" tabindex="-1" center="dialog" id="editModal">
-        <div class="modal-dialog" center="document">
+    <div wire:ignore.self class="modal fade" tabindex="-1" admin="dialog" id="editModal">
+        <div class="modal-dialog" admin="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Modal Title</h5>
@@ -125,11 +147,29 @@
                 <form action="" wire:submit.prevent="updateAdmin">
                     @csrf
                     <div class="modal-body">
-                        <div class="form-group">
-                            <label for="">name</label>
-                            <span class="text-danger">@error('name'){{$message}}@enderror</span>
-                            <input type="text" wire:model.defer="name" class="form-control">
-                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="">name</label>
+                                <span class="text-danger">@error('name'){{$message}}@enderror</span>
+                                <input type="text" wire:model.defer="name" class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="">email</label>
+                                <span class="text-danger">@error('email'){{$message}}@enderror</span>
+                                <input type="email" wire:model.defer="email" class="form-control">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="admin-admin">admin</label>
+                                <span class="text-danger">@error('role_id'){{$message}}@enderror</span>
+                                <select name="" id="" wire:model.defer="role_id" class="custom-select">
+                                    <option value="">select a admin</option>
+                                    @foreach($roles as $role)
+                                        <option value="{{$role->id}}">{{$role->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
                     </div>
                     <div class="modal-footer">
@@ -138,30 +178,6 @@
                         <button type="submit" wire:loading.attr="disabled" class="btn btn-primary">Save changes</button>
                     </div>
                 </form>
-            </div>
-        </div>
-    </div>
-
-    <div wire:ignore.self class="modal fade" tabindex="-1" center="dialog" id="deleteModal">
-        @csrf
-        <div class="modal-dialog" center="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">delete centers</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>are you sure that you want to delete this center?</p>
-                </div>
-                <div class="modal-footer">
-                    <form action="" wire:submit.prevent="deleteAdmin" method="post">
-                        @csrf
-                        <button type="submit" wire:loading.attr="disabled" class="btn btn-danger">delete center</button>
-                    </form>
-                    <button type="button" id="closeDeleteSelectedModal" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
             </div>
         </div>
     </div>

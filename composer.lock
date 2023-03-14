@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b3146f1e15712ec71760bf22217561e8",
+    "content-hash": "813f3c3aa0cbb701756bad3edcedf6b8",
     "packages": [
         {
             "name": "beste/clock",
@@ -3085,6 +3085,56 @@
                 "source": "https://github.com/thephpleague/oauth1-client/tree/v1.10.1"
             },
             "time": "2022-04-15T14:02:14+00:00"
+        },
+        {
+            "name": "leanadmin/livewire-access",
+            "version": "v0.1.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/archtechx/livewire-access.git",
+                "reference": "9aae65bd8014f0afd41681e2863ab471ccadde9b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/archtechx/livewire-access/zipball/9aae65bd8014f0afd41681e2863ab471ccadde9b",
+                "reference": "9aae65bd8014f0afd41681e2863ab471ccadde9b",
+                "shasum": ""
+            },
+            "require": {
+                "livewire/livewire": "^2.10",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^7.0|^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Lean\\LivewireAccess\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Samuel Štancl",
+                    "email": "samuel.stancl@gmail.com"
+                }
+            ],
+            "description": "Control frontend access to properties/methods in Livewire using PHP 8 attributes.",
+            "support": {
+                "issues": "https://github.com/archtechx/livewire-access/issues",
+                "source": "https://github.com/archtechx/livewire-access/tree/v0.1.3"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/stancl",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-02-16T16:05:28+00:00"
         },
         {
             "name": "livewire/livewire",
