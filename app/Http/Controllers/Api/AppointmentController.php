@@ -9,6 +9,7 @@ use App\Models\DonationCenter;
 use App\Models\Social;
 use App\Models\User;
 use App\Traits\ResponseApi;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -35,12 +36,12 @@ class AppointmentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): \Illuminate\Http\JsonResponse
+    public function store(Request $request): JsonResponse
     {
         $user = \request()->user();
 
-        if ($this->checkUserAppointmentExists($user)){
-            return $this->responseError('Sorry, you cannot make another appointment at this time. You already have an appointment scheduled within the next two months. This is because blood donation is generally recommended once every two months to ensure your body has enough time to recover fully.');
+        if ((string) $errorMessage = $this->canScheduleAppointment($user)) {
+            return $this->responseError($errorMessage);
         }
 
         $validator = Validator::make($request->all(), [
@@ -67,9 +68,10 @@ class AppointmentController extends Controller
         $appointment = Appointment::where('center_id', $center->id)
             ->whereDate('date',$date)->latest('time')->first();
 
-        if ($appointment && Carbon::parse($appointment->time)->addMinutes(20)->greaterThanOrEqualTo(Carbon::createFromTime(16, 0, 0))) {
-            return $this->validationErrors(['error' => 'No available appointments after 4 PM']);
-        }
+//        if ($appointment && Carbon::parse($appointment->time)->addMinutes(20)
+//                ->greaterThanOrEqualTo(Carbon::createFromTime(16, 0, 0))) {
+//            return $this->validationErrors(['error' => 'No available appointments after 4 PM']);
+//        }
 
         $nextAvailableTime = $this->getNextAvailableTime($appointment);
 
@@ -109,16 +111,36 @@ class AppointmentController extends Controller
         return $nextAvailableTime;
     }
 
-    private function checkUserAppointmentExists(Social|User $user):bool
+    private function canScheduleAppointment(Social|User $user): ?string
     {
         $now = Carbon::now();
         $twoMonthsFromNow = $now->copy()->addMonths(2);
 
-        return $user->appointments()
+        if ($user->appointments()
             ->scheduled()
             ->whereBetween('date', [$now, $twoMonthsFromNow])
-            ->exists();
+            ->exists()) {
+            return 'Sorry, you cannot make another appointment at this time. You already have an appointment scheduled within the next two months. This is because blood donation is generally recommended once every two months to ensure your body has enough time to recover fully.';
+        }
+
+        $lastAppointment = $user->appointments()->latest('date')->first();
+
+        if (!$lastAppointment) {
+            return null;
+        }
+
+        $lastAppointmentDate = Carbon::parse($lastAppointment->date);
+        $eligibleDate = $lastAppointmentDate->addMonths(2);
+
+        if ($eligibleDate->isFuture()) {
+            return "Your last appointment was on {$lastAppointmentDate->format('l, F jS, Y')}, so you cannot make another appointment before {$eligibleDate->format('l, F jS, Y')}.";
+        }
+
+        return null;
     }
+
+
+
     /**
      * Display the specified resource.
      */
@@ -167,10 +189,10 @@ class AppointmentController extends Controller
         $appointmentAtDate = Appointment::where('center_id', $center->id)
             ->whereDate('date',$date)->latest('time')->first();
 
-        if ($appointmentAtDate && Carbon::parse($appointmentAtDate->time)->addMinutes(20)
-                ->greaterThanOrEqualTo(Carbon::createFromTime(16, 0, 0))) {
-            return $this->validationErrors(['error' => 'No available appointments after 4 PM']);
-        }
+//        if ($appointmentAtDate && Carbon::parse($appointmentAtDate->time)->addMinutes(20)
+//                ->greaterThanOrEqualTo(Carbon::createFromTime(16, 0, 0))) {
+//            return $this->validationErrors(['error' => 'No available appointments after 4 PM']);
+//        }
         $nextAvailableTime = $this->getNextAvailableTime($appointmentAtDate);
         if ($nextAvailableTime == null)
             return $this->responseError('you cannot take an appointment at this day');
