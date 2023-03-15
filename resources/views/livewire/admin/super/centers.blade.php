@@ -56,6 +56,13 @@
                 </tr>
             @endforelse
             </tbody>
+
+{{--            <tr wire:loading wire:target="addCenter,updateCenter,deleteCenter">--}}
+{{--                <td colspan="7" style="text-align-last: center" class="text-admin text-center">--}}
+{{--                    loading ...--}}
+{{--                </td>--}}
+{{--            </tr>--}}
+
         </table>
         {{$centers->links()}}
     </div>

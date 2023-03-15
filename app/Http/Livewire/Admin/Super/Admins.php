@@ -31,6 +31,7 @@ class Admins extends Component
     public string $name = "";
     public string $email = "";
     public string $search = "";
+    public int $typeFilter = 0;
 
     public function mount(){
         if (!auth()->guard()->user()->isSuperAdmin())abort(403);
@@ -41,11 +42,18 @@ class Admins extends Component
         $admins = Admin::when(!empty($this->search),function ($q){
                     $q->where('name','like','%'.$this->search.'%')
                     ->orWhere('email','like','%'.$this->search.'%');
-                })->nonSuperAdmins()->with('role')->paginate(abs($this->perPage));
+                })->nonSuperAdmins()
+            ->whereHas('role', function ($q){
+                $q->when(!$this->typeFilter == 0,function () use ($q){
+                    $q->where('id',$this->typeFilter);
+                });
+            })
+            ->with('role')
+            ->paginate(abs($this->perPage));
 
         return view('livewire.admin.super.admins',[
             'admins' => $admins,
-            'roles' => Role::get()
+            'roles' => Role::where('name','<>','super-admin')->get()
         ]);
     }
 

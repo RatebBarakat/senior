@@ -111,7 +111,7 @@ class Centers extends Component
         $this->center_id = $id;
         $this->center = DonationCenter::with('location','admin')->findOrFail($this->center_id);
         $this->name = $this->center->name;
-        $this->admin_id = $this->center->admin->id;
+        $this->admin_id = $this->center->admin->id ?? null;
         $this->location_id = $this->center->location->id;
         $this->dispatchBrowserEvent('open-edit-modal');
     }

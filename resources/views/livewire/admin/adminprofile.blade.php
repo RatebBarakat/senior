@@ -27,7 +27,7 @@
                 avatar
                 @error('newAvatar'){{$message}}@enderror
 
-                <input class="form-control-file" type="file" wire:model.defer="newAvatar">
+                <input class="form-control-file" type="file" wire:model="newAvatar">
             </div>
 
             <div class="col-12">
