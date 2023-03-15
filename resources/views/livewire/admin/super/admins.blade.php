@@ -5,10 +5,17 @@
         </button>
     @endcan
 
+
     <div class="table-responsive">
         <div class="form-group w-25 w-md-50">
             <input type="search" name="" placeholder="search..." id="search" class="form-control"
                    wire:model="search">
+            <select name="" id="" wire:model="typeFilter" class="custom-select w-50 mt-2">
+                <option value="0">filter by role</option>
+                @foreach($roles as $role)
+                    <option value="{{$role->id}}">{{$role->name}}</option>
+                @endforeach
+            </select>
         </div>
         <table class="table">
             <thead class="bg-primary">
@@ -19,7 +26,7 @@
             <td class="text-white">role</td>
             <td class="text-white">actions</td>
             </thead>
-            <tbody>
+            <tbody wire:loading.remove wire:target="addAdmin,updateAdmin,deleteAdmin">
             @forelse($admins as $admin)
                 <tr>
                     <td>{{$loop->iteration}}</td>
@@ -46,10 +53,17 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-admin"> no admins </td>
+                    <td colspan="7" style="text-align-last: center" class="text-admin"> no admins </td>
                 </tr>
             @endforelse
             </tbody>
+
+            <tr wire:loading wire:target="addAdmin,updateAdmin,deleteAdmin">
+                <td colspan="7" style="text-align-last: center" class="text-admin text-center">
+                    loading ...
+                </td>
+            </tr>
+
         </table>
         {{$admins->links()}}
     </div>

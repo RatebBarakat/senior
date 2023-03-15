@@ -10,22 +10,15 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
-class Profiles extends Component
+class Adminprofile extends Component
 {
-    use WithPagination,WithExplicitAccess,WithFileUploads;
-    #[BlockFrontendAccess]
+    use WithPagination,WithFileUploads;
 
     public string $name = "";
     public string $location = "";
     public string $bio = "";
-    public \App\Models\Profile $profile;
     public $oldAvatar;
     public $newAvatar;
-
-    public function checkprofile() :bool{
-        $authId = Profile::where('id',auth()->guard('admin')->user()->id)->first();
-        return $authId === $this->profile->id;
-    }
 
     public function mount()
     {
@@ -40,18 +33,25 @@ class Profiles extends Component
         $this->bio = $this->profile->bio ? $this->profile->bio : '';
     }
 
+    #[BlockFrontendAccess]
+    public \App\Models\Profile $profile;
+
+    public function checkprofile() :bool{
+        $authId = Profile::where('admin_id',auth()->guard('admin')->user()->id)->first();
+        return $authId->id === $this->profile->id;
+    }
 
     public function render()
     {
         $this->oldAvatar = $this->profile->avatar;
-        return view('livewire.admin.profile',[
+        return view('livewire.admin.adminprofile',[
             'profile' => $this->profile
         ]);
     }
 
     public function updateProfile()
     {
-        abort_if(!$this->checkprofile());
+        if (!$this->checkprofile())abort(403);
         $this->validate([
             'name' => 'required|string|min:2',
             'location' => 'nullable|string|min:2',

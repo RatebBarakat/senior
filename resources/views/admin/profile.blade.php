@@ -4,7 +4,7 @@
 @endsection
 
 @section('content')
-    @livewire('admin.profile')
+    @livewire('admin.adminprofile')
 @endsection
 
 @push('js')
