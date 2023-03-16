@@ -45,6 +45,16 @@ class Admin extends Authenticatable
         return $this->role && $this->role->name == "super-admin";
     }
 
+    public function isAdminCenter(): bool
+    {
+        if ($this->role && $this->role->name == "center-admin" && $this->center()->exists()) {
+            $this->load('center');
+            return true;
+        }
+        return false;
+    }
+
+
     public function hasPermission($name)
     {
         return $this->role && $this->role->permissions->contains('name', $name);

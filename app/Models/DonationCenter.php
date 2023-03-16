@@ -23,4 +23,13 @@ class DonationCenter extends Model
     {
         return $this->hasOne(Admin::class, 'id', 'admin_id');
     }
+
+
+    public function employees()
+    {
+        return $this->hasMany(Admin::class,'center_id')
+            ->whereHas('role', function ($query) {
+                $query->where('name', 'center-employee');
+        });
+    }
 }

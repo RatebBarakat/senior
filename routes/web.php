@@ -70,9 +70,17 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
 
    Route::middleware('superAdmin')->group(function (){
        Route::view('/roles','admin.super.roles')->name('roles');
+
        Route::prefix('centers')->name('centers.')->group(function (){
            Route::view('/','admin.super.centers')->name('index');
            Route::view('/create','admin.super.create-center')->name('create');
-       });       Route::view('/admins','admin.super.admins')->name('admins');
+       });
+
+       Route::view('/admins','admin.super.admins')->name('admins');
+   });
+
+   Route::middleware('centerAdmin')->name('admincenter.')
+       ->prefix('center')->group(function (){
+      Route::view('/','admin.center.index')->name('index');
    });
 });
