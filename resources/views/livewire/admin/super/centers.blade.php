@@ -1,8 +1,9 @@
 <div class="container-lg">
+<div class="container-lg">
     @can('create-centers')
-        <button wire:click="showAddModal" class="btn btn-success align-self-end float-right mb-1">
+        <a href="{{route('admin.centers.create')}}" class="btn btn-success align-self-end float-right mb-1">
             add center
-        </button>
+        </a>
     @endcan
 
     <div class="table-responsive">
@@ -67,50 +68,50 @@
         {{$centers->links()}}
     </div>
 
-    <div wire:ignore.self class="modal fade" tabindex="-1" center="dialog" id="addModal">
-        <div class="modal-dialog" center="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">add center</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                            wire:click="hideAddModal">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form action="" wire:submit.prevent="addCenter">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="form-group">
-                            <label for="">name</label>
-                            <span class="text-danger">@error('name'){{$message}}@enderror</span>
-                            <input type="text" wire:model.defer="name" class="form-control">
-                        </div>
-                        <span class="text-danger">@error('location_id'){{$message}}@enderror</span>
-                        <select name="" id="" wire:model.defer="location_id" class="custom-select">
-                            <option value="">select an option</option>
-                            @foreach($locations as $location)
-                                <option value="{{$location->id}}">{{$location->name}}</option>
-                            @endforeach
-                        </select>
-                            <div class="form-group">
-                                <label for="admin-center">admin center</label>
-                                <select name="" id="" wire:model.defer="admin_id" class="custom-select">
-                                    <option value="{{null}}">select an admin</option>
-                                    @foreach($admins as $admin)
-                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                                wire:click="hideAddModal">Close</button>
-                        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary">Save changes</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+{{--    <div wire:ignore.self class="modal fade" tabindex="-1" center="dialog" id="addModal">--}}
+{{--        <div class="modal-dialog" center="document">--}}
+{{--            <div class="modal-content">--}}
+{{--                <div class="modal-header">--}}
+{{--                    <h5 class="modal-title">add center</h5>--}}
+{{--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"--}}
+{{--                            wire:click="hideAddModal">--}}
+{{--                        <span aria-hidden="true">&times;</span>--}}
+{{--                    </button>--}}
+{{--                </div>--}}
+{{--                <form action="" wire:submit.prevent="addCenter">--}}
+{{--                    @csrf--}}
+{{--                    <div class="modal-body">--}}
+{{--                        <div class="form-group">--}}
+{{--                            <label for="">name</label>--}}
+{{--                            <span class="text-danger">@error('name'){{$message}}@enderror</span>--}}
+{{--                            <input type="text" wire:model.defer="name" class="form-control">--}}
+{{--                        </div>--}}
+{{--                        <span class="text-danger">@error('location_id'){{$message}}@enderror</span>--}}
+{{--                        <select name="" id="" wire:model.defer="location_id" class="custom-select">--}}
+{{--                            <option value="">select an option</option>--}}
+{{--                            @foreach($locations as $location)--}}
+{{--                                <option value="{{$location->id}}">{{$location->name}}</option>--}}
+{{--                            @endforeach--}}
+{{--                        </select>--}}
+{{--                            <div class="form-group">--}}
+{{--                                <label for="admin-center">admin center</label>--}}
+{{--                                <select name="" id="" wire:model.defer="admin_id" class="custom-select">--}}
+{{--                                    <option value="{{null}}">select an admin</option>--}}
+{{--                                    @foreach($admins as $admin)--}}
+{{--                                        <option value="{{$admin->id}}">{{$admin->name}}</option>--}}
+{{--                                    @endforeach--}}
+{{--                                </select>--}}
+{{--                            </div>--}}
+{{--                    </div>--}}
+{{--                    <div class="modal-footer">--}}
+{{--                        <button type="button" class="btn btn-secondary" data-dismiss="modal"--}}
+{{--                                wire:click="hideAddModal">Close</button>--}}
+{{--                        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary">Save changes</button>--}}
+{{--                    </div>--}}
+{{--                </form>--}}
+{{--            </div>--}}
+{{--        </div>--}}
+{{--    </div>--}}
 
     <div wire:ignore.self class="modal fade" tabindex="-1" center="dialog" id="editModal">
         <div class="modal-dialog" center="document">
@@ -142,7 +143,9 @@
                             <div class="form-group">
                                 <label for="admin-center">admin center</label>
                                 <select name="" id="" wire:model.defer="admin_id" class="custom-select">
-                                    <option value="{{null}}">select an admin</option>
+                                    @if($centerAdmin != null)
+                                        <option value="{{$centerAdmin->id}}">{{$centerAdmin->name}}</option>
+                                    @endif
                                     @foreach($admins as $admin)
                                         <option value="{{$admin->id}}">{{$admin->name}}</option>
                                     @endforeach

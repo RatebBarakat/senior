@@ -19,9 +19,15 @@ use Laravel\Socialite\Facades\Socialite;
 |
 */
 
-Route::get('/', function () {
-    return view('googlelogin');
+
+Route::middleware('guest:admin')->get('/', function () {
+    return view('admin.login');
 })->name('home');
+
+Route::post('/admin/login',[\App\Http\Controllers\Controller::class,'login'])
+    ->name('admin.login');
+
+
 Route::get('/success',function (){
    return view('success');
 })->name('success');
@@ -30,6 +36,8 @@ Route::get('/seed',function (){
 
 });
 
+Route::post('/admin/login',[\App\Http\Controllers\Controller::class,'login'])
+    ->name('admin.login');
 
 Route::get('auth/{provider}', [SocialLoginController::class, 'redirectToProvider'])
     ->name('google.redirect');
@@ -62,7 +70,9 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
 
    Route::middleware('superAdmin')->group(function (){
        Route::view('/roles','admin.super.roles')->name('roles');
-       Route::view('/centers','admin.super.centers')->name('centers');
-       Route::view('/admins','admin.super.admins')->name('admins');
+       Route::prefix('centers')->name('centers.')->group(function (){
+           Route::view('/','admin.super.centers')->name('index');
+           Route::view('/create','admin.super.create-center')->name('create');
+       });       Route::view('/admins','admin.super.admins')->name('admins');
    });
 });

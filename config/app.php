@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Facade;
 return [
 
     /*
-    |--------------------------------------------------------------------------
+    |-------------------------------------------------------br-------------------
     | Application Name
     |--------------------------------------------------------------------------
     |
@@ -171,7 +171,6 @@ return [
         Illuminate\Foundation\Providers\FoundationServiceProvider::class,
         Illuminate\Hashing\HashServiceProvider::class,
         Illuminate\Mail\MailServiceProvider::class,
-        Illuminate\Notifications\NotificationServiceProvider::class,
         Illuminate\Pagination\PaginationServiceProvider::class,
         Illuminate\Pipeline\PipelineServiceProvider::class,
         Illuminate\Queue\QueueServiceProvider::class,
@@ -181,7 +180,6 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
-        BeyondCode\LaravelWebSockets\WebSocketsServiceProvider::class,
 
         /*
          * Package Service Providers...

@@ -58,6 +58,10 @@ class Admin extends Authenticatable
             });
         });
     }
+
+    public function center(){
+        return $this->hasOne(DonationCenter::class);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *

@@ -16,8 +16,10 @@ use Livewire\WithPagination;
 class Centers extends Component
 {
     use WithPagination,WithImplicitAccess;
+
     #[BlockFrontendAccess]
 
+    public ?Admin $centerAdmin = null;
     public ?DonationCenter $center = null;
     public $selectedCenters = [];
     public int $center_id = 0;
@@ -48,16 +50,13 @@ class Centers extends Component
 //            $this->isSelectedAll = true;
         return view('livewire.admin.super.centers',[
             'centers' => $centers,
-            'admins' => Admin::select('id','name')->get(),
+            'admins' => Admin::select('id','name')
+                ->whereHas('role', function ($q){
+                    $q->where('name','center-admin');
+                })->doesntHave('center')
+                ->with('role')->get(),
             'locations' => Location::get()
         ]);
-    }
-
-    public function showAddModal()
-    {
-        $this->resetValidation();
-        $this->resetInputs();
-        $this->dispatchBrowserEvent('show-add-modal');
     }
 
     public function alert(string $type,string $message){
@@ -65,29 +64,6 @@ class Centers extends Component
             'type' => $type,
             'message' => $message
         ]);
-    }
-
-    public function hideAddModal()
-    {
-        $this->dispatchBrowserEvent('hide-add-modal');
-    }
-
-    public function addCenter(){
-        if (!Gate::allows('create-centers'))abort(403);
-        $this->validate([
-            'name' => 'required|string|min:2',
-            'location_id' => ['required', 'integer',Rule::exists('locations', 'id')],
-            'admin_id' => ['nullable',Rule::exists('admins', 'id')]
-        ]);
-
-        DonationCenter::create([
-            'name' => $this->name,
-            'location_id' => $this->location_id,
-            'admin_id' => $this->admin_id == null ? null : (int) $this->admin_id
-        ]);
-        $this->alert('success','center addedd successfully');
-
-        $this->hideAddModal();
     }
 
     public function openDeleteModal(int $id){
@@ -112,6 +88,7 @@ class Centers extends Component
         $this->center = DonationCenter::with('location','admin')->findOrFail($this->center_id);
         $this->name = $this->center->name;
         $this->admin_id = $this->center->admin->id ?? null;
+        $this->centerAdmin = $this->center->admin;
         $this->location_id = $this->center->location->id;
         $this->dispatchBrowserEvent('open-edit-modal');
     }
