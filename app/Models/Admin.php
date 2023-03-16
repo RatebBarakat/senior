@@ -21,7 +21,8 @@ class Admin extends Authenticatable
         'name',
         'email',
         'password',
-        'role_id'
+        'role_id',
+        'center_id'
     ];
 
     public function attachRole($roleName)
@@ -69,9 +70,20 @@ class Admin extends Authenticatable
         });
     }
 
+    public function scopeCentersEmployees($query)
+    {
+        return $query->where(function($q) {
+            $q->WhereHas('role', function($q) {
+                $q->where('name', 'center-employee');
+            });
+        });
+    }
+
+
     public function center(){
         return $this->hasOne(DonationCenter::class);
     }
+
     /**
      * The attributes that should be hidden for serialization.
      *
