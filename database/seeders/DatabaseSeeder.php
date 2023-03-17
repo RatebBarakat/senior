@@ -10,6 +10,7 @@ use App\Models\Role;
 use App\Models\User;
 use Dotenv\Util\Str;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Gate;
 
 class DatabaseSeeder extends Seeder
 {
@@ -19,25 +20,28 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $allPermission = [
-            'categories' => 'c,r,u,d',
-            'users' => 'c,r,u,d',
-            'roles' => 'c,r,u,d'
+            'admins' => 'm,c,r,u,d',
+            'roles' => 'm,c,r,u,d',
+            'centers' => 'm,c,r,u,d',
+            'appointments' => 'm,r,u',
+            'employees' => 'm,c,d'
         ];
         $rolesArray = [
-            'admin' => [
-                'categories' => 'c,r',
-                'users' => 'c,r',
-                'roles' => 'r'
-            ],
             'super admin' => [
-                '*' => '*'
+                'admins' => 'm,c,r,u,d',
+                'roles' => 'm,c,r,u,d',
+                'centers' => 'm,c,r,u,d',
             ],
-            'user' => [
-                'categories' => 'r',
-                'users' => 'r',
+            'center admin' => [
+                'employees' => 'm,c,d'
             ],
+            'center employee' => [
+                'appointments' => 'm,r,u',
+            ]
         ];
+
         $permissionsMap = [
+            'm' => 'manage',
             'c' => 'create',
             'r' => 'read',
             'u' => 'update',
@@ -57,32 +61,13 @@ class DatabaseSeeder extends Seeder
         foreach ($rolesArray as $roleName => $rolePermissions) {//attach permission to actor based on their role
             $role = Role::create(['name' => \Illuminate\Support\Str::slug($roleName)]);
             foreach ($rolePermissions as $type => $content){
-                if ($type == 'super-admin' || $content == '*'){
-                    continue;
-                }else{
-                    foreach (explode(",", $content) as $permission) {
-                        $name =  $permissionsMap[$permission]. "-$type";
-                        $perm = \App\Models\Permission::where(['name' => $name])->first();
-                        $role->permissions()->attach($perm);
-                    }
+                foreach (explode(",", $content) as $permission) {
+                    $name =  $permissionsMap[$permission]. "-$type";
+                    $perm = \App\Models\Permission::where(['name' => $name])->first();
+                    $role->permissions()->attach($perm);
                 }
-
             }
         }
-
-        $user = User::factory()->make([
-           'name' => fake()->name(),
-           'email' => fake()->email(),
-           'password' => '$2y$10$SU7fXZaVS6ArumU9zCiu0OExbt9dJ.3OqEwGIBsPU2GbZL87yFuMy'
-        ]);
-        $user->attachRole('user');
-
-        $admin = Admin::create([
-           'name' => 'user',
-           'email' => 'admin@gmail.com',
-           'password' => '$2y$10$SU7fXZaVS6ArumU9zCiu0OExbt9dJ.3OqEwGIBsPU2GbZL87yFuMy'
-        ]);
-        $admin->attachRole('admin');
 
         $superAdmin = Admin::create([
             'name' => 'super',

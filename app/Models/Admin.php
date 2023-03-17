@@ -36,6 +36,12 @@ class Admin extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function hasRole($roleName): bool
+    {
+        return $this->role->name === $roleName;
+    }
+    
+
     public function profile()
     {
         return $this->hasOne(Profile::class)->withDefault();

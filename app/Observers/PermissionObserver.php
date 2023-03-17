@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Permission;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
 
 class PermissionObserver
 {
@@ -12,7 +13,9 @@ class PermissionObserver
      */
     public function created(Permission $permission): void
     {
-        //
+        Gate::define($permission->name, function ($user) use ($permission) {
+            return $user->hasPermission($permission->name);
+        });
     }
 
     /**
@@ -20,7 +23,9 @@ class PermissionObserver
      */
     public function updated(Permission $permission) :void
     {
-        if (Cache::has('permissions'))Cache::delete('permissions');
+        Gate::define($permission->name, function ($user) use ($permission) {
+            return $user->hasPermission($permission->name);
+        });
     }
 
     /**
@@ -28,7 +33,7 @@ class PermissionObserver
      */
     public function deleted(Permission $permission): void
     {
-        //
+
     }
 
     /**
