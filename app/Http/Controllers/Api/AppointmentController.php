@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class AppointmentController extends Controller
 {
@@ -46,6 +47,8 @@ class AppointmentController extends Controller
 
         $validator = Validator::make($request->all(), [
             'center_id' => 'required|integer|exists:donation_centers,id',
+            'blood_type' => ['required',
+                Rule::in('A+','B+','O+','AB+','A-','B-','O-','AB-')],
             'date' => [
                 'required',
                 'date_format:Y-m-d',
@@ -78,20 +81,21 @@ class AppointmentController extends Controller
         if ($nextAvailableTime == null)
             return $this->responseError('you cannot take an appointment at this day');
 
-        $newAppointment = $this->createNewAppointment($user, $center, $date, $nextAvailableTime);
+        $newAppointment = $this->createNewAppointment($user, $center, $date, $nextAvailableTime,$request->input('blood_type'));
 
         return $this->successResponse(['appointment' => $newAppointment],
             "Appointment added on " . $date->format('l, F jS, Y') . " at " . $nextAvailableTime->format('g:i A'));
     }
 
-    private function createNewAppointment($user, DonationCenter $center, Carbon $date, Carbon $time)
+    private function createNewAppointment($user, DonationCenter $center, Carbon $date, Carbon $time,$blood_type)
     {
         return Appointment::create([
             'user_id' => $user->id,
             'center_id' => $center->id,
             'status' => 'scheduled',
             'date' => $date->format('Y-m-d'),
-            'time' => $time->format('H:i:s')
+            'time' => $time->format('H:i:s'),
+            'blood_type' => $blood_type
         ]);
     }
 

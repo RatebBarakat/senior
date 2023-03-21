@@ -60,6 +60,10 @@ class Admin extends Authenticatable
         }
         return false;
     }
+    public function isEmployee() :bool
+    {
+        return $this->role && $this->role->name == "center-employee";
+    }
 
 
     public function hasPermission($name)
@@ -90,11 +94,23 @@ class Admin extends Authenticatable
         return $this->hasOne(DonationCenter::class);
     }
 
+    public function employeeCenter()
+    {
+        return $this->hasOne(DonationCenter::class, 'id', 'center_id');
+    }
+
+    public function appointments()
+    {
+        return $this->hasManyThrough(Appointment::class,DonationCenter::class,
+        'center_id','center_id');
+    }
+    
     /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
      */
+
     protected $hidden = [
         'password',
         'remember_token',

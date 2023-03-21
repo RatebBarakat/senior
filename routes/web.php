@@ -3,10 +3,15 @@
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Api\SocialLoginController;
+use App\Mail\SendPdfEmail as MailSendPdfEmail;
 use App\Models\Role;
+use App\Notifications\SendPdfEmail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Socialite\Facades\Socialite;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -83,4 +88,59 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
        ->prefix('center')->group(function (){
       Route::view('/','admin.center.index')->name('index');
    });
+
+   Route::middleware(['employee'])->name('appointments.')->group(function () {
+      Route::view('/appointments','admin.appointment.index')->name('index');
+   });
 });
+
+
+Route::get('/pdf',function() {
+    $data = [
+        'title' => 'مرحبا بالعالم',
+        'content' => 'هذا هو محتوى الصفحة باللغة العربية'
+    ];
+
+    // Create a new TCPDF object
+    $pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
+
+    // Set the document properties
+    $pdf->SetCreator('Your Name');
+    $pdf->SetAuthor('Your Name');
+    $pdf->SetTitle('My PDF');
+    $pdf->SetSubject('Example');
+
+    // Set the default font and font size
+    $pdf->SetFont('dejavusans', '', 12);
+
+    // Add a new page to the PDF
+    $pdf->AddPage();
+
+    // Render the view as HTML
+    $html = View::make('admin.appointment-pdf', compact('data'))->render();
+
+    // Write the HTML to the PDF
+    $pdf->writeHTML($html, true, false, true, false, '');
+
+    // Output the PDF
+    $pdf->Output(storage_path('app/public/pdf/my-pdf.pdf'), 'F');
+
+    // Send email with PDF attachment
+    $email = 'rfb005@live.aul.edu.lb';
+    $subject = 'Test PDF';
+    $body = 'Please find the attached PDF file.';
+    $attachment = storage_path('app/public/my-pdf.pdf');
+
+    $pdfContent = $pdf->Output('example.pdf', 'S');
+    Mail::send([], [], function ($message) use ($pdfContent) {
+        $message->to('rfb005@live.aul.edu.lb')
+                ->subject('PDF Example')
+                ->attachData($pdfContent, 'example.pdf', [
+                    'mime' => 'application/pdf',
+                ]);
+    });
+
+    // Delete the PDF file
+    unlink($attachment);
+});
+

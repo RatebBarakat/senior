@@ -63,24 +63,14 @@ class LoginController extends Controller
         if (!$user){
             return response()->json(['errors' => 'credentials not match record'],400);
         }
-        if ($user) {
-            $role = $user->role;
-            if ($role) {
-                $permissions = $role->permissions->pluck('name')->toArray();
-                // do something with the $permissions object
-            } else {
-                // handle the case where the user doesn't have a role
-            }
-        } else {
-            // handle the case where the user doesn't exist
-        }
+    
         if (Hash::check($request->input('password'),$user->password)){
             $token = $user->createToken($request->input('email').'Token',
-                $permissions,now()->addHours(2))
+                ['user'],now()->addHours(2))
                 ->plainTextToken;
             return response()->json(['token' => $token,
                 'user' => UserResourse::make($user),
-                'permissions' => $permissions
+                'role' => 'user'
             ]);
         }
         return response()->json(['errors' => 'wrong password'],400);
