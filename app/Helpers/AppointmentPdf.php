@@ -20,8 +20,9 @@ class AppointmentPdf
         
             $pdf->AddPage();
     
-            $html = "<h2>hello {$appointment->user->name}</h2>";
-            $html.= "<p>thnk you for donating {$quantity} of blood of type {$appointment->blood_type} at center {$appointment->center->name}";
+            $html = "<h2>hello <span ".'style=color="blue"'.">{$appointment->user->name}</span></h2>";
+            $html.= "<p>thnk you for donating <span ".'style=color="blue"'.">{$quantity}</span> of blood of type {$appointment->blood_type} 
+            at <span ".'style=color="blue"'.">{$appointment->center->name}</span> center";
         
             $pdf->writeHTML($html, true, false, true, false, '');
         

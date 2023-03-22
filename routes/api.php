@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->prefix('user')->name('user.')->group(function
     });
 
     Route::name('appointment.')->group(function () {
+        Route::post('/appointment/download/{id}',[AppointmentController::class,'downloadPdf'])->name('download');
         Route::apiResource('/appointment',AppointmentController::class);
     });
 });

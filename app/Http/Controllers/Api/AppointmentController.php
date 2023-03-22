@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -22,6 +23,28 @@ class AppointmentController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+    public function downloadPdf(int $id)
+    {
+        $appointment = Appointment::findOrFail($id);
+        $filename = storage_path('app/public/pdf/' . $appointment->pdf_file);
+    
+        if (file_exists($filename)) {
+            // file exists, so you can download it
+            $fileContents = file_get_contents($filename);
+    
+            // return file contents or response
+            return response()->make($fileContents, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $appointment->pdf_file . '"'
+            ]);
+        } else {
+            // file does not exist
+            return response()->json(['message' => 'File not found'], 404);
+        }    
+    }
+    
+
     public function index()
     {
 //        DB::enableQueryLog();
