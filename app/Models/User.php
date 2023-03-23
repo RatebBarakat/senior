@@ -3,6 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,9 +13,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable,MustVerifyEmailTrait;
 
     protected static function boot()
     {
@@ -36,13 +39,13 @@ class User extends Authenticatable
         'name',
         'user_name',
         'email',
+        'email_verified_at',
         'role_id',
         'password',
-        'provider',
-        'provider_id',
-        'provider_token',
     ];
 
+
+    
     public function attachRole($roleName)
     {
         $role = Role::where('name', $roleName)->firstOrFail();
