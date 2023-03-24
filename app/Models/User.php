@@ -44,7 +44,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
     ];
 
-
+    public function requests()
+    {
+        return $this->hasMany(BloodRequest::class,'user_id','id');
+    }
     
     public function attachRole($roleName)
     {

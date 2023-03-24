@@ -6,6 +6,10 @@
 table tr td{
     color: black !important;
 }
+
+.radius{
+    border-radius: .35rem;
+}
 .ready-only{
     user-select: none;
     cursor: unset;
@@ -13,6 +17,12 @@ table tr td{
 .profile-show{
     border-radius: 10px;
     box-shadow: 0 10px 20px 0 rgb(58 59 69 / 15%);
+}
+/* .shadow{
+    box-shadow: 0 10px 20px 0 rgb(58 59 69 / 15%);
+} */
+.border{
+    border: 1px solid lightgrey !important;
 }
 .ready-only:focus{
     box-shadow: none !important;

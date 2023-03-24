@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Donation extends Model
+class BloodRequest extends Model
 {
     use HasFactory;
 
     protected $guarded = [];
 
-    public function center()
+    public function user()
     {
-        return $this->belongsTo(DonationCenter::class,'center_id ','id');
+        return $this->belongsTo(User::class,'user_id','id');
     }
 }

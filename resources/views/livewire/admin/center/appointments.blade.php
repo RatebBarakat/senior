@@ -77,6 +77,12 @@
                             <span class="text-danger">@error('quantity'){{$message}}@enderror</span>
                             <input type="number" wire:model.defer="quantity" class="form-control">
                         </div>
+
+                        <div class="form-group w-100">
+                            <label for="">expire at</label>
+                            <span class="text-danger">@error('expire_at'){{$message}}@enderror</span>
+                            <input type="date" wire:model.defer="expire_at" class="form-control">
+                        </div>
                        
                 </div>
                 <div class="modal-footer">

@@ -21,6 +21,7 @@ class Appointments extends Component
     public ?int $appointment_id = null;
     public ?Appointment $appointment = null;
     public int $quantity = 0;
+    public $expire_at;
 
     public function mount()
     {
@@ -51,7 +52,8 @@ class Appointments extends Component
     {
         $this->validate([
             'appointment_id' => 'required|exists:appointments,id',
-            'quantity' => 'required|integer|min:1|max:3'
+            'quantity' => 'required|integer|min:1|max:3',
+            'expire_at' => 'required|date|after:tomorrow',
         ]);
 
         $this->appointment->load('center','user');
@@ -64,6 +66,8 @@ class Appointments extends Component
             'user_id' => $this->appointment->user->id, 
             'appointment_id' => $this->appointment->id, 
             'center_id' => $this->appointment->center->id, 
+            'date' => Carbon::now()->format('y-m-d'),
+            'expire_at' => $this->expire_at
         ]);
 
         $pdfName = AppointmentPdf::generatePdf($this->appointment,$this->quantity,'test AppointmentPdf');

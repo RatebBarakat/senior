@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Api\SocialLoginController;
 use App\Mail\SendPdfEmail as MailSendPdfEmail;
 use App\Models\Role;
@@ -64,7 +65,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
         return redirect('/');
     })->name('logout');
 
-   Route::view('/','admin.dashboard')->name('index');
+   Route::get('/',[DashboardController::class,'index'])->name('index');
    Route::prefix('location')->name('location.')->group(function (){
        Route::view('/create','admin.create-location')->name('create');
        Route::post('/create',[LocationController::class,'store'])->name('store');
