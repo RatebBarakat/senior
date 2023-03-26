@@ -7,6 +7,9 @@ use App\Http\Controllers\Api\SocialLoginController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\LoginController;
+use App\Http\Controllers\Api\BloodRequestController;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\PersonalAccessToken;
 
 /*
@@ -38,13 +41,43 @@ Route::middleware(['auth:sanctum','api.admin'])->group(function (){
     Route::apiResource('/users',UserController::class);
 });
 
-Route::middleware('auth:sanctum')->prefix('user')->name('user.')->group(function (){
+Route::middleware('auth:sanctum','verified')->prefix('user')->name('user.')->group(function (){
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::post('/update',[ProfileController::class,'update'])->name('update');
         Route::apiResource('',ProfileController::class)->only('index');
     });
 
     Route::name('appointment.')->group(function () {
+        Route::post('/appointment/download/{id}',[AppointmentController::class,'downloadPdf'])->name('download');
         Route::apiResource('/appointment',AppointmentController::class);
+    });
+
+    Route::name('request.')->prefix('request')->group(function ()
+    {
+       Route::post('/',[BloodRequestController::class,'store'])->name('store');
+    });
+});
+
+Route::middleware('guest:sanctum')->group(function ()
+{
+    Route::post('/register',function (Request $request)
+    {
+        try {
+                    // Create new user
+        $user = User::create([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => Hash::make($request->input('password')),
+        ]);
+    
+        // Send verification email
+        $user->sendEmailVerificationNotification();
+    
+        // Redirect to home or show a success message
+        return response()->json('Please check your email to verify your account.');
+        } catch (\Exception $ex) {
+            return response()->json($ex->getMessage());
+
+        }
     });
 });

@@ -6,6 +6,7 @@ use App\Http\Middleware\adminCheck;
 use App\Http\Middleware\checkAdminGuest;
 use App\Http\Middleware\checkAuth;
 use App\Http\Middleware\checkCenterAdmin;
+use App\Http\Middleware\checkEmployeeAdmin;
 use App\Http\Middleware\isSuperAdmin;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
@@ -71,6 +72,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'superAdmin' => IsSuperAdmin::class,
         'centerAdmin' => checkCenterAdmin::class,
+        'employee' => checkEmployeeAdmin::class,
         'api.guest' => checkAdminGuest::class,
         'api.user' => checkAuth::class,
         'api.admin' => adminCheck::class
