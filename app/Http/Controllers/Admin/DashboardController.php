@@ -36,6 +36,7 @@ class DashboardController extends Controller
                 ->where('expire_at', '>=', Carbon::now()->format('y-m-d'))
                 ->groupBy('blood_type')
                 ->get();
+                
         } else {
 
         
@@ -85,8 +86,11 @@ class DashboardController extends Controller
                 ->groupBy('blood_type')
                 ->get();
         }
+  
+
+        
         $query = DB::getQueryLog();
         return view('admin.dashboard',compact('donationsWeek','donationsMounth','expireBlood', 'nonExpireBlood'));
-    }
     
+    }
 }
