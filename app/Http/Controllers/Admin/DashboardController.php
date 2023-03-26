@@ -26,6 +26,7 @@ class DashboardController extends Controller
                 ->whereBetween('date',[Carbon::now()->subMonth(),Carbon::now()])
                 ->groupBy('blood_type')
                 ->get();
+<<<<<<< HEAD
 
             $expireBlood = Donation::select('blood_type', DB::raw('SUM(quantity) AS total_expire'))
                 ->where('expire_at', '<', Carbon::now()->format('y-m-d'))
@@ -36,6 +37,8 @@ class DashboardController extends Controller
                 ->where('expire_at', '>=', Carbon::now()->format('y-m-d'))
                 ->groupBy('blood_type')
                 ->get();
+=======
+>>>>>>> 4495fd5fc3ed5bb086f659b6d56208c08a143aad
         } else {
 
         
@@ -64,6 +67,7 @@ class DashboardController extends Controller
                 ->whereBetween('date',[Carbon::now()->subMonth(),Carbon::now()])
                 ->groupBy('blood_type')
                 ->get();
+<<<<<<< HEAD
 
             $expireBlood = Donation::select('blood_type', DB::raw('SUM(quantity) AS total_expire'))
                 ->where('expire_at', '<', Carbon::now()->format('y-m-d'))
@@ -90,3 +94,11 @@ class DashboardController extends Controller
     }
     
 }
+=======
+        }
+        $query = DB::getQueryLog();
+        return view('admin.dashboard',compact('donationsWeek','donationsMounth','query'));
+    }
+    
+}
+>>>>>>> 4495fd5fc3ed5bb086f659b6d56208c08a143aad
