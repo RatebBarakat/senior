@@ -11,6 +11,7 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
 use App\Notifications\SendPdfEmail;
 use App\Helpers\AppointmentPdf;
+use App\Jobs\SendAppointmentEmailJob;
 use TCPDF;
 
 class Appointments extends Component
@@ -58,34 +59,35 @@ class Appointments extends Component
 
         $this->appointment->load('center','user');
 
-      try {
-        DB::beginTransaction();
-        Donation::create([
-            'quantity' => $this->quantity,
-            'blood_type' => $this->appointment->blood_type,
-            'user_id' => $this->appointment->user->id, 
-            'appointment_id' => $this->appointment->id, 
-            'center_id' => $this->appointment->center->id, 
-            'date' => Carbon::now()->format('y-m-d'),
-            'expire_at' => $this->expire_at
-        ]);
-
-        $pdfName = AppointmentPdf::generatePdf($this->appointment,$this->quantity,'test AppointmentPdf');
-
-        $this->appointment->update([
-            'status' => 'complete',
-            'pdf_file' => $pdfName
-        ]);
-
-        $this->dispatchBrowserEvent('hide-complete-modal');
-        $this->alert('success','appointment comleted successfully');
-      } catch (\Exception $th) {
-        DB::rollback();
-        $this->alert('error',$th->getMessage());
-      }
-
-      DB::commit();
-    
+        try {
+            DB::beginTransaction();
+        
+            Donation::create([
+                'quantity' => $this->quantity,
+                'blood_type' => $this->appointment->blood_type,
+                'user_id' => $this->appointment->user->id, 
+                'appointment_id' => $this->appointment->id, 
+                'center_id' => $this->appointment->center->id, 
+                'date' => Carbon::now()->format('y-m-d'),
+                'expire_at' => $this->expire_at
+            ]);
+        
+            $pdfName = AppointmentPdf::generatePdf($this->appointment, $this->quantity,'test back');
+            
+        
+            $this->appointment->update([
+                'status' => 'complete',
+                'pdf_file' => $pdfName
+            ]);
+        
+            DB::commit();
+            $this->dispatchBrowserEvent('hide-complete-modal');
+            $this->alert('success', 'Appointment completed successfully');
+        } catch (\Exception $e) {
+            DB::rollback();
+            $this->alert('error', $e->getMessage());
+        }
+        
         
 
     }
