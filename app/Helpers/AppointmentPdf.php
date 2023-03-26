@@ -1,20 +1,20 @@
-<?php
 
+<?php
 namespace App\Helpers;
 
-use App\Jobs\SendAppointmentEmailJob;
+use App\Jobs\SendPdfByEmail;
 use App\Models\Appointment;
-use Illuminate\Support\Facades\Storage;
-use Symfony\Component\Mailer\Messenger\SendEmailMessage;
+use Illuminate\Support\Facades\Mail;
 use TCPDF;
 
 class AppointmentPdf 
 {
-    public static function generatePdf(Appointment $appointment, int $quantity, $subject = 'Appointment Complete')
+    public static function generatePdf(Appointment $appointment,int $quantity,$subject = 'appointment complete')
     {
-        $pdfName = $appointment->user->name . '_' . now()->format('YmdHis') . '.pdf';
-        dispatch(new SendAppointmentEmailJob($pdfName, $appointment, $quantity,$subject));
-
+          
+        $pdfName = $appointment->user->name . now()->format('YmdHis') . '.pdf';
+        dispatch(new SendPdfByEmail($appointment,$pdfName,$quantity,'pdf test'));
         return $pdfName;
+            
     }
 }
