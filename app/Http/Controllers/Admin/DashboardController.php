@@ -36,7 +36,10 @@ class DashboardController extends Controller
                 ->where('expire_at', '>=', Carbon::now()->format('y-m-d'))
                 ->groupBy('blood_type')
                 ->get();
-                
+
+            $bloodByType = Donation::select('blood_type', DB::raw('SUM(quantity) AS total_quantity'))
+            ->groupBy('blood_type')
+            ->get();
         } else {
 
         
@@ -85,12 +88,21 @@ class DashboardController extends Controller
                 })
                 ->groupBy('blood_type')
                 ->get();
+
+            $bloodByType = Donation::select('blood_type', DB::raw('SUM(quantity) AS total_quantity'))
+                ->whereIn('center_id', function($query) use ($user,$centerId) {
+                    $query->select('id')
+                        ->from('donation_centers')
+                        ->where('id', $centerId);
+                })    
+                ->groupBy('blood_type')
+                ->get();
         }
   
 
         
         $query = DB::getQueryLog();
-        return view('admin.dashboard',compact('donationsWeek','donationsMounth','expireBlood', 'nonExpireBlood'));
+        return view('admin.dashboard',compact('donationsWeek','donationsMounth','expireBlood', 'nonExpireBlood','bloodByType'));
     
     }
 }
