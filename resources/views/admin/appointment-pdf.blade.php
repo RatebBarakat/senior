@@ -20,7 +20,7 @@
 <body dir="rtl">
 
     <h2>appointment completed</h2>
-    <p> tank you for donating blood </p>
+    <p> tank you for donating blood </p>قشفثلا
 
 </body>
 </html>
