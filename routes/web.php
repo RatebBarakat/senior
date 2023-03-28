@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Api\BloodRequestController;
 use App\Http\Controllers\Api\SocialLoginController;
 use App\Mail\SendPdfEmail as MailSendPdfEmail;
 use App\Models\Role;
@@ -69,6 +70,11 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
    Route::prefix('location')->name('location.')->group(function (){
        Route::view('/create','admin.create-location')->name('create');
        Route::post('/create',[LocationController::class,'store'])->name('store');
+   });
+
+   Route::prefix('blood')->name('request.')->group(function ()
+   {
+        Route::get('/show/{id}',[BloodRequestController::class,'show'])->name('show');
    });
 
     Route::get('/profile/{id}',[ProfileController::class,'viewProfile'])->name('profile.show');

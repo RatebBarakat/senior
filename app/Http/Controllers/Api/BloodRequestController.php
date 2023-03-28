@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\NotifyAdminsBloodRequest;
 use App\Models\BloodRequest;
 use App\Traits\ResponseApi;
 use Illuminate\Http\Request;
@@ -38,7 +39,13 @@ class BloodRequestController extends Controller
         }
 
         $bloodRequest = BloodRequest::create($validator->validated());
-
+        dispatch(new NotifyAdminsBloodRequest($bloodRequest));
         return $this->successResponse(['bloodRequest' => $bloodRequest],'request addedd successfully');
+    }
+
+    public function show(int $id)
+    {
+        $blood = BloodRequest::findOrFail($id);
+        return $blood->patient_name;
     }
 }
