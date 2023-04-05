@@ -2,22 +2,20 @@
 
 namespace App\Jobs;
 
-use App\Models\Admin;
 use App\Models\BloodRequest;
-use App\Notifications\BloodRequestNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
 
-class NotifyAdminsBloodRequest implements ShouldQueue
+class ResetBloodRequestLockJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
     protected BloodRequest $bloodRequest;
+
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
      * Create a new job instance.
@@ -32,7 +30,11 @@ class NotifyAdminsBloodRequest implements ShouldQueue
      */
     public function handle(): void
     {
-        $admins = Admin::centersEmployees()->get();
-        Notification::send($admins, new BloodRequestNotification($this->bloodRequest));
+        if ($this->bloodRequest && !is_null($this->bloodRequest->locked_by)) {
+            DB::beginTransaction();
+            $this->bloodRequest->locked_by = null;
+            $this->bloodRequest->save();
+            DB::commit();
+        }
     }
 }

@@ -15,4 +15,9 @@ class BloodRequest extends Model
     {
         return $this->belongsTo(User::class,'user_id','id');
     }
+
+    public function center()
+    {
+        return $this->belongsTo(DonationCenter::class,'center_id','id');
+    }
 }

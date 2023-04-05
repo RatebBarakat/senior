@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class BloodType extends Model
 {
     use HasFactory;
-    protected $fillable = ['blood_type'];
+    protected $fillable = ['blood_type','locked_by'];
 }

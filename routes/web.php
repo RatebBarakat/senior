@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BloodRequestController as AdminBloodRequestController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -81,6 +82,11 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::get('/profile/',[ProfileController::class,'index'])
         ->name('profile');
 
+    Route::prefix('blood-request')->name('blood-request.')->group(function ()
+    {
+       Route::get('/{id}',[AdminBloodRequestController::class,'show'])->name('show');
+    });
+
    Route::middleware('superAdmin')->group(function (){
        Route::view('/roles','admin.super.roles')->name('roles');
 
@@ -130,52 +136,4 @@ Route::post('/email/verification-notification', function (Request $request) {
  
     return back()->with('message', 'Verification link sent!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
-// Route::get('/pdf',function() {
-//     $data = [
-//         'title' => 'مرحبا بالعالم',
-//         'content' => 'هذا هو محتوى الصفحة باللغة العربية'
-//     ];
-
-//     // Create a new TCPDF object
-//     $pdf = new TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);
-
-//     // Set the document properties
-//     $pdf->SetCreator('Your Name');
-//     $pdf->SetAuthor('Your Name');
-//     $pdf->SetTitle('My PDF');
-//     $pdf->SetSubject('Example');
-
-//     // Set the default font and font size
-//     $pdf->SetFont('dejavusans', '', 12);
-
-//     // Add a new page to the PDF
-//     $pdf->AddPage();
-
-//     // Render the view as HTML
-//     $html = View::make('admin.appointment-pdf', compact('data'))->render();
-
-//     // Write the HTML to the PDF
-//     $pdf->writeHTML($html, true, false, true, false, '');
-
-//     // Output the PDF
-//     $pdf->Output(storage_path('app/public/pdf/my-pdf.pdf'), 'F');
-
-//     // Send email with PDF attachment
-//     $email = 'rfb005@live.aul.edu.lb';
-//     $subject = 'Test PDF';
-//     $body = 'Please find the attached PDF file.';
-//     $attachment = storage_path('app/public/my-pdf.pdf');
-
-//     $pdfContent = $pdf->Output('example.pdf', 'S');
-//     Mail::send([], [], function ($message) use ($pdfContent) {
-//         $message->to('rfb005@live.aul.edu.lb')
-//                 ->subject('PDF Example')
-//                 ->attachData($pdfContent, 'example.pdf', [
-//                     'mime' => 'application/pdf',
-//                 ]);
-//     });
-
-//     // Delete the PDF file
-//     unlink($attachment);
-// });
 
