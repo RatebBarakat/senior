@@ -74,10 +74,10 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
        Route::post('/create',[LocationController::class,'store'])->name('store');
    });
 
-   Route::prefix('blood')->name('request.')->group(function ()
-   {
-        Route::get('/show/{id}',[BloodRequestController::class,'show'])->name('show');
-   });
+//    Route::prefix('blood')->name('request.')->group(function ()
+//    {
+//         Route::get('/show/{id}',[BloodRequestController::class,'show'])->name('show');
+//    });
 
     Route::get('/profile/{id}',[ProfileController::class,'viewProfile'])->name('profile.show');
     Route::get('/profile/',[ProfileController::class,'index'])

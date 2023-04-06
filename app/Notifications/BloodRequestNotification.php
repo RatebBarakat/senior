@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class BloodRequestNotification extends Notification 
+class BloodRequestNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -31,35 +31,16 @@ class BloodRequestNotification extends Notification
         return ['database'];
     }
 
-    public function toDatabase($notifiable)
+    public function toArray($notifiable)
     {
         return [
             'message' => 'new blood request was generated click bellow to show it',
-            'url' => route('admin.request.show',[$this->bloodRequest->id]),
+            'url' => $this->getActionUrl($notifiable),
         ];
     }
-
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    // public function toMail(object $notifiable): MailMessage
-    // {
-    //     return (new MailMessage)
-    //                 ->line('The introduction to the notification.')
-    //                 ->action('Notification Action', url('/'))
-    //                 ->line('Thank you for using our application!');
-    // }
-
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
+    
+    protected function getActionUrl($notifiable)
     {
-        return [
-            //
-        ];
+        return route('admin.blood-request.index', ['filter' => $this->bloodRequest->id]);
     }
 }

@@ -9,6 +9,11 @@ use Livewire\Component;
 
 class Index extends Component
 {
+    public int $filter = 0;
+ 
+    protected $queryString = [
+        'filter' => ['except' => 0],
+    ];
     public function mount()
     {
         abort_if(Gate::denies('manage-blood-requests'),403);
@@ -34,7 +39,13 @@ class Index extends Component
                 $query->where('status', 'pending');
             }]
         );
-        $bloodRequests = auth()->guard('admin')->user()->bloodRequests;
+        $id = request()->query('filter');
+        if ($id) {
+            $bloodRequests = auth()->guard('admin')->user()->bloodRequests()->where('id', $id)
+            ->get();
+        } else {
+            $bloodRequests = auth()->guard('admin')->user()->bloodRequests;
+        }
         return view('livewire.admin.blood-request.index',compact('bloodRequests','sumAvailableByType'));
     }
 }

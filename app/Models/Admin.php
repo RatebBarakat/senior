@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -94,16 +95,20 @@ class Admin extends Authenticatable
         return $this->hasOne(DonationCenter::class);
     }
 
+    /**
+     * Get the user that owns the Admin
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function employeeCenter(): BelongsTo
+    {
+        return $this->belongsTo(DonationCenter::class, 'center_id', 'id');
+    }
+
     public function bloodRequests()
     {
         return $this->hasMany(BloodRequest::class, 'center_id', 'center_id');
     }
-
-    public function donationCenters()
-    {
-        return $this->hasMany(DonationCenter::class);
-    }
-
 
 
     public function appointments()
