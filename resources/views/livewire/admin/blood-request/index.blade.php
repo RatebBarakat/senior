@@ -1,5 +1,19 @@
 <div>
     <div class="container-lg">
+        <div class="filters" style="display: flex">
+            <span class="w-50">
+                <label for="can">can comlete</label>
+                <input type="checkbox" name="" id="can" wire:model="canComplete">
+            </span> <hr>
+            <span class="w-50">
+                <label for="status">urgency level</label>
+                <select name="" id="" class="custom-select" wire:model="urgencyLevel">
+                    <option value="">select to filter</option>
+                    <option value="immediate">immediate</option>
+                    <option value="24 hours">24 hours</option>
+                </select>
+            </span>
+        </div>
         <div class="table-responsive">
             <div class="form-group w-25 w-md-50">
                 <input type="search" name="" placeholder="search..." id="search" class="form-control"
