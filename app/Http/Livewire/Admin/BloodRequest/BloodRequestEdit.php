@@ -112,7 +112,7 @@ class BloodRequestEdit extends Component
                 new BloodRequestCompleted(auth()->guard('admin')->user(),$this->bloodRequest));
             DB::commit();
             $this->hideCompleteRequest();
-            return redirect('/admin');
+            return redirect()->route('admin.blood-request.index');
         } catch (\Throwable $th) {
             DB::rollback();
             $this->alert('error',$th->getMessage());

@@ -41,9 +41,9 @@ class BloodRequestController extends Controller
     
             DB::commit();
     
-            return view('admin.blood-request-show', compact('bloodRequest','AvailableBLood'));
+            return view('admin.blood-request.blood-request-show', compact('bloodRequest','AvailableBLood'));
         } else if ($bloodRequest->locked_by === auth()->guard('admin')->user()->id) {
-            return view('admin.blood-request-show', compact('bloodRequest','AvailableBLood'));
+            return view('admin.blood-request.blood-request-show', compact('bloodRequest','AvailableBLood'));
         } else {
             abort(403, 'This blood request is taken by another admin');
         }

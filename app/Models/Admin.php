@@ -94,10 +94,17 @@ class Admin extends Authenticatable
         return $this->hasOne(DonationCenter::class);
     }
 
-    public function employeeCenter()
+    public function bloodRequests()
     {
-        return $this->hasOne(DonationCenter::class, 'id', 'center_id');
+        return $this->hasMany(BloodRequest::class, 'center_id', 'center_id');
     }
+
+    public function donationCenters()
+    {
+        return $this->hasMany(DonationCenter::class);
+    }
+
+
 
     public function appointments()
     {

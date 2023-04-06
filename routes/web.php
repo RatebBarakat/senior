@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Api\BloodRequestController;
 use App\Http\Controllers\Api\SocialLoginController;
 use App\Mail\SendPdfEmail as MailSendPdfEmail;
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Notifications\SendPdfEmail;
@@ -84,6 +85,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
 
     Route::prefix('blood-request')->name('blood-request.')->group(function ()
     {
+        Route::view('/', 'admin.blood-request.index')->name('index');
        Route::get('/{id}',[AdminBloodRequestController::class,'show'])->name('show');
     });
 

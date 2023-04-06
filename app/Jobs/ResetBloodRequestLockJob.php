@@ -30,7 +30,8 @@ class ResetBloodRequestLockJob implements ShouldQueue
      */
     public function handle(): void
     {
-        if ($this->bloodRequest && !is_null($this->bloodRequest->locked_by)) {
+        if ($this->bloodRequest && !is_null($this->bloodRequest->locked_by)
+         && $this->bloodRequest->status == 'pending') {
             DB::beginTransaction();
             $this->bloodRequest->locked_by = null;
             $this->bloodRequest->save();
