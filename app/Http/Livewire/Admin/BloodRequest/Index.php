@@ -38,7 +38,7 @@ class Index extends Component
             $query->where('status', 'pending');
         }]);
         $id = request()->query('filter');
-        $bloodRequestsQuery = $admin->bloodRequests();
+        $bloodRequestsQuery = $admin->bloodRequests()->where('status','pending');
         
         if ($id) {
             $this->filter = $id;

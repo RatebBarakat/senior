@@ -6,6 +6,7 @@ use App\Models\BloodRequest;
 use App\Models\Donation;
 use App\Notifications\BloodRequestCompleted;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -99,17 +100,42 @@ class BloodRequestEdit extends Component
     public function completeRequest()
     {
         DB::beginTransaction();
+    
         try {
             foreach ($this->selectedBlood as $value => $id) {
                 $donation = Donation::where('id', $id)->lockForUpdate()->firstOrFail();
-                $donation->taken = 1;
-                $donation->save();
+                if ($donation->taken == 0) {
+                    if (isset($this->neededDecrement[0][$donation->id])) {
+                        $quantity = $this->neededDecrement[0][$donation->id];
+                        if ($donation->quantity >= $quantity) {
+                            $donation->quantity -= $quantity;
+                            $donation->save();
+                            foreach($this->neededDecrement as $key => $value) {
+                                if(array_key_exists($donation->id, $value)) {
+                                    unset($this->neededDecrement[$key]);
+                                    break;
+                                }
+                            }
+                        }else {
+                            throw new Exception('quantity not enouth');
+                        }
+                    } else {
+                        $donation->taken = 1;
+                    }
+                    $donation->save();
+                } else {
+                    throw new Exception('another admin use this blood so you cannot use it');
+                }
             }
+    
             $this->bloodRequest->status = "fulfilled";
             $this->bloodRequest->locked_by = null;
             $this->bloodRequest->save();
+    
             $this->bloodRequest->user->notify(
-                new BloodRequestCompleted(auth()->guard('admin')->user(),$this->bloodRequest));
+                new BloodRequestCompleted(auth()->guard('admin')->user(),$this->bloodRequest)
+            );
+    
             DB::commit();
             $this->hideCompleteRequest();
             return redirect()->route('admin.blood-request.index');
@@ -118,4 +144,5 @@ class BloodRequestEdit extends Component
             $this->alert('error',$th->getMessage());
         }
     }
+    
 }
