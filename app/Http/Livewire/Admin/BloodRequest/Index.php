@@ -44,7 +44,6 @@ class Index extends Component
             $this->filter = $id;
             $bloodRequestsQuery->where('id', $id);
         }
-        
         $bloodRequests = $bloodRequestsQuery
             ->when($this->urgencyLevel != "", function ($query) {
                 $query->where('urgency_level', $this->urgencyLevel);
@@ -53,7 +52,7 @@ class Index extends Component
             {
                 $q->where('id',$this->filter);
             })
-            ->when($this->canComplete, function ($query) use ($sumAvailableByType) {
+            ->when($this->canComplete && !$sumAvailableByType->isEmpty(), function ($query) use ($sumAvailableByType) {
                 $query->where(function ($subquery) use ($sumAvailableByType) {
                     $sumAvailableByType->each(function ($quantity, $bloodType) use ($subquery) {
                         $subquery->orWhere(function ($q) use ($bloodType, $quantity) {
@@ -62,7 +61,10 @@ class Index extends Component
                         });
                     });
                 });
-            })            
+            })    
+            ->when($this->canComplete && $sumAvailableByType->isEmpty(), function ($query) {
+                $query->whereRaw('false');
+            })        
             ->get();
         
         return view('livewire.admin.blood-request.index', compact('bloodRequests', 'sumAvailableByType'));
