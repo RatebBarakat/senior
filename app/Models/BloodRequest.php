@@ -20,4 +20,11 @@ class BloodRequest extends Model
     {
         return $this->belongsTo(DonationCenter::class,'center_id','id');
     }
+
+    public function donations()
+    {
+        return $this->belongsToMany(Donation::class, 'blood_request_donation',
+         'blood_request_id', 'donation_id')
+            ->withPivot('quantity_used');
+    }
 }

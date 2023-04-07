@@ -120,8 +120,10 @@ class BloodRequestEdit extends Component
                             throw new Exception('quantity not enouth');
                         }
                     } else {
+                        $quantity = $donation->quantity;
                         $donation->taken = 1;
                     }
+                    $this->bloodRequest->donations()->attach($donation->id, ['quantity_used' => $quantity]);
                     $donation->save();
                 } else {
                     throw new Exception('another admin use this blood so you cannot use it');
