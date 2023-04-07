@@ -77,6 +77,7 @@ class Appointments extends Component
         
             $this->appointment->update([
                 'status' => 'complete',
+                'quantity' => $this->quantity,
                 'pdf_file' => $pdfName
             ]);
         
