@@ -62,7 +62,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" style="text-align-last: center" class="text-bloodRequest"> no bloodRequests </td>
+                        <td colspan="11" style="text-align-last: center" class="text-bloodRequest"> no bloodRequests </td>
                     </tr>
                 @endforelse
                 
