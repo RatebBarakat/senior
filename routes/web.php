@@ -70,8 +70,8 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
 
    Route::get('/',[DashboardController::class,'index'])->name('index');
    Route::prefix('location')->name('location.')->group(function (){
-    // Route::view('/',)->name('index');
-       Route::view('/create','admin.create-location')->name('create');
+    Route::get('/',[LocationController::class,'index'])->name('index');
+       Route::view('/create','admin.location.create-location')->name('create');
        Route::post('/create',[LocationController::class,'store'])->name('store');
    });
 

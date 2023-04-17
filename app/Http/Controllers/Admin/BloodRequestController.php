@@ -9,6 +9,8 @@ use App\Models\Donation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Validator;
 use SysvSemaphore;
 
 class BloodRequestController extends Controller
@@ -50,6 +52,27 @@ class BloodRequestController extends Controller
     
     }
 
+    public function unLock(Request $request)
+    {
+        $validator = Validator::make($request->all(),[
+            'id' => 'required|integer|exists:blood_requests'
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(),400);
+        }
+        $bloodRequest = BloodRequest::findOrFail($request->input('id'));
+        if ($bloodRequest->locked_by && $bloodRequest->locked_by == auth()->guard('admin')->user()->id) {
+            $bloodRequest->locked_by = null;
+            $bloodRequest->save();
+            return response()->json(['message' => 'blood request unlocked'],200);
+        }
+        return response()->json([
+            'message' => 'you cannot unlock this blood request',
+            'url' => url('/admin')
+        ],200);
+    }
+    
+
     private function resetLockedBy(BloodRequest $bloodRequest)
     {
         $bloodRequest->locked_by = null;
@@ -71,8 +94,5 @@ class BloodRequestController extends Controller
             'sum_available' => $sumAvailable
         ];
     }
-    
-    
-    
     
 }

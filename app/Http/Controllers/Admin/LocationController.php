@@ -9,11 +9,12 @@ use Illuminate\Http\Request;
 class LocationController extends Controller
 {
     public function index(){
-        return view('admin.location');
+        $locations = Location::get()->toArray();
+        return view('admin.location.index',compact('locations'));
     }
 
     public function create(){
-        return view('admin.create-location');
+        return view('admin.location.create-location');
     }
 
     public function store(Request $request)

@@ -119,6 +119,7 @@
             $('#longitude').val('');
             marker.remove();
             marker = null;
+            window.location.href = "/admin/location"
         },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error(errorThrown);
