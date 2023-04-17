@@ -28,9 +28,10 @@
             <button class="btn btn-primary" type="submit">Search</button>
         </div>
     </form> --}}
+    <a href="/admin" class="btn btn-primary mt-3 ml-3">back to dashboard</a>
 
     <form id="location-form" class="px-3">
-        <div id="mapid" style="height: 500px;"></div>
+        <div id="mapid" class="my-3" style="height: 500px;"></div>
         <div class="form-group mt-3">
             <input class="form-control" type="text" value="{{$location->name}}" id="city" name="name" placeholder="Location Name">
             <button class="btn btn-primary" type="submit">update Location</button>

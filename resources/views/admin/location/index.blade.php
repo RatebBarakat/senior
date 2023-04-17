@@ -21,7 +21,10 @@
     </style>
 </head>
 <body>
-    <div id="mapid" style="height: 500px;"></div>
+    
+    <a href="/admin" class="btn btn-primary mt-3 ml-3">back to dashboard</a>
+
+    <div id="mapid" class="m-3" style="height: 500px;"></div>
 
     <a href="{{route('admin.location.create')}}" class="btn btn-primary m-3">create new location</a>
 
