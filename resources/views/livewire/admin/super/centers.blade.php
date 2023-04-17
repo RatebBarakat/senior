@@ -29,7 +29,7 @@
                     </td>
                     <td>{{$center->name}}</td>
                     <td>
-                       {{$center->location->city}}
+                       {{$center->location->city ?? ""}}
                     </td>
                     <td>
                         @if($center->admin_id == null)

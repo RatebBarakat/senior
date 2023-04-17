@@ -23,6 +23,7 @@
 <body>
     <div id="mapid" style="height: 500px;"></div>
 
+    <a href="{{route('admin.location.create')}}" class="btn btn-primary m-3">create new location</a>
 
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -32,8 +33,12 @@
         var locations = {!! json_encode($locations) !!};
         var mymap = L.map('mapid');
         var firstLocation = locations[0];
-        mymap.setView([firstLocation.latitude, firstLocation.longitude], 11);
-        var marker = L.marker([firstLocation.latitude, firstLocation.longitude]).addTo(mymap);
+        if (firstLocation) {
+            mymap.setView([firstLocation.latitude, firstLocation.longitude], 11);  
+            var marker = L.marker([firstLocation.latitude, firstLocation.longitude]).addTo(mymap);
+        }else{
+            mymap.setView([33.882957310697, 35.494079589844], 11);  
+        }
 
         // Add the OpenStreetMap tile layer to the map
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -42,9 +47,11 @@
         }).addTo(mymap);
     
         locations.forEach((location) => {
-            var marker = L.marker([location.latitude, location.longitude]).addTo(mymap);
-            marker.bindPopup("<a href='{{route('admin.location.create')}}'>"+location.name+"</a>").openPopup();
-        });
+        const marker = L.marker([location.latitude, location.longitude]).addTo(mymap);
+        const editUrl = "{{ route('admin.location.edit', ':id') }}".replace(':id', location.id);
+        marker.bindPopup(`<a href="${editUrl}">${location.name}</a>`).openPopup();
+    });
+
         // // Loop through each location and add a marker to the map
         // for (var i = 0; i < locations.length; i++) {
         //     var location = locations[i];

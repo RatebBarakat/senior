@@ -32,53 +32,36 @@
     <form id="location-form" class="px-3">
         <div id="mapid" style="height: 500px;"></div>
         <div class="form-group mt-3">
-            <input class="form-control" type="text" id="city" name="name" placeholder="Location Name">
-            <button class="btn btn-primary" type="submit">Add Location</button>
+            <input class="form-control" type="text" value="{{$location->name}}" id="city" name="name" placeholder="Location Name">
+            <button class="btn btn-primary" type="submit">update Location</button>
         </div>
         <input type="hidden" name="latitude" id="latitude">
         <input type="hidden" name="longitude" id="longitude">
     </form>
-    
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder@1.13.1/dist/Control.Geocoder.js"></script>
     <script src="https://unpkg.com/esri-leaflet-geocoder@2.3.0/dist/esri-leaflet-geocoder.js"></script>
     <script>
         var mymap = L.map('mapid');
-        
-// Get the user's location using the Geolocation API
-// Check if the browser supports the Geolocation API
-if (navigator.geolocation) {
-  // Ask the user for permission to access their location
-  navigator.geolocation.getCurrentPosition(function(position) {
-    // Get the latitude and longitude values from the Geolocation API
-    var lat = position.coords.latitude;
-    var lon = position.coords.longitude;
-
+        var lat =  {!! $location->latitude !!};
+        var long = {!! $location->longitude !!};
+        var id = {!! $location->id !!};
     // Initialize the OpenStreetMap using Leaflet.js library
-    mymap.setView([lat, lon], 11);
+    mymap.setView([lat, long], 11);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
       maxZoom: 18,
     }).addTo(mymap);
 
-    // Add a marker to the map to show the user's location
-    // L.marker([lat, lon]).addTo(mymap)
-    //   .bindPopup('Your location')
-    //   .openPopup();
-  });
-} else {
-  // If the browser does not support the Geolocation API, display an error message
-  alert('Geolocation is not supported by this browser.');
-}
 
 
-  
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
             maxZoom: 18,
         }).addTo(mymap);
-        var marker;
+        var marker = L.marker([lat, long]).addTo(mymap);
         mymap.on('click', function(e) {
             if (marker) {
                 marker.setLatLng(e.latlng);
@@ -116,7 +99,7 @@ if (navigator.geolocation) {
     event.preventDefault();
     var token = '{{ csrf_token() }}'; // Retrieve the CSRF token
     $.ajax({
-        url: '{{ route("admin.location.store") }}',
+        url: `{{ route("admin.location.update", ":id") }}`.replace(':id', id),
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': token // Set the CSRF token in the headers
@@ -129,7 +112,7 @@ if (navigator.geolocation) {
         success: function(response) {
             // Handle success response
             console.log(response);
-            alert('Location added successfully!');
+            alert('Location updated successfully!');
             $('#search-input').val('');
             $('#latitude').val('');
             $('#longitude').val('');

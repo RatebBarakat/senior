@@ -69,11 +69,6 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     })->name('logout');
 
    Route::get('/',[DashboardController::class,'index'])->name('index');
-   Route::prefix('location')->name('location.')->group(function (){
-    Route::get('/',[LocationController::class,'index'])->name('index');
-       Route::view('/create','admin.location.create-location')->name('create');
-       Route::post('/create',[LocationController::class,'store'])->name('store');
-   });
 
 //    Route::prefix('blood')->name('request.')->group(function ()
 //    {
@@ -92,6 +87,14 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     });
 
    Route::middleware('superAdmin')->group(function (){
+
+        Route::prefix('location')->name('location.')->group(function (){
+            Route::get('/',[LocationController::class,'index'])->name('index');
+            Route::view('/create','admin.location.create-location')->name('create');
+            Route::post('/create',[LocationController::class,'store'])->name('store');
+            Route::get('/edit/{id}',[LocationController::class,'edit'])->name('edit');
+            Route::post('/update/{id}',[LocationController::class,'update'])->name('update');
+        });
        Route::view('/roles','admin.super.roles')->name('roles');
 
        Route::prefix('centers')->name('centers.')->group(function (){
