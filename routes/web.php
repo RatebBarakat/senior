@@ -70,6 +70,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
 
    Route::get('/',[DashboardController::class,'index'])->name('index');
    Route::prefix('location')->name('location.')->group(function (){
+    // Route::view('/',)->name('index');
        Route::view('/create','admin.create-location')->name('create');
        Route::post('/create',[LocationController::class,'store'])->name('store');
    });
@@ -87,6 +88,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     {
         Route::view('/', 'admin.blood-request.index')->name('index');
        Route::get('/{id}',[AdminBloodRequestController::class,'show'])->name('show');
+       Route::post('/unlock',[AdminBloodRequestController::class,'unLock'])->name('unLock');
     });
 
    Route::middleware('superAdmin')->group(function (){
