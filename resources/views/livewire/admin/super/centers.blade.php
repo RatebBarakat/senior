@@ -133,8 +133,9 @@
                         </div>
                         @if($center != null)
                             <select class="custom-select" wire:model="location_id" name="" id="">
+                                <option value="0">select a locarion</option>
                                 @foreach($locations as $location)
-                                    <option value="{{$location->id}}" @selected($center->location->id === $location->id)>
+                                    <option value="{{$location->id}}">
                                         {{$location->name}}
                                     </option>
                                 @endforeach

@@ -89,7 +89,7 @@ class Centers extends Component
         $this->name = $this->center->name;
         $this->admin_id = $this->center->admin->id ?? null;
         $this->centerAdmin = $this->center->admin;
-        $this->location_id = $this->center->location->id;
+        $this->location_id = $this->center->location->id ?? 0;
         $this->dispatchBrowserEvent('open-edit-modal');
     }
 
