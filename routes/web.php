@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BloodRequestController as AdminBloodRequestContro
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Api\BloodRequestController;
 use App\Http\Controllers\Api\SocialLoginController;
 use App\Mail\SendPdfEmail as MailSendPdfEmail;
@@ -59,6 +60,11 @@ Route::get('/login',function (){
 });
 
 Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function (){
+
+    Route::prefix('notification')->name('notification.')->group(function ()
+    {
+        Route::put('/{id}/markAsRead',[NotificationController::class,'markAsRead'])->name('markRead');
+    });
 
     Route::post('/logout', function (Request $request) {
         auth()->guard('admin')->logout();

@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title')</title>
 
@@ -20,7 +21,7 @@
     <link rel="stylesheet" href="{{ asset('css/sb-admin-2.css') }}">
     <link rel="stylesheet" href="{{asset('css/admin/admin.css')}}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
+    @yield('css')
     @livewireStyles
 </head>
 
@@ -210,7 +211,7 @@
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fas fa-bell fa-fw"></i>
                                 <!-- Counter - Alerts -->
-                                <span class="badge badge-danger badge-counter">3+</span>
+                                <span class="badge badge-danger badge-counter">{{count(auth()->guard('admin')->user()->unreadNotifications)}}</span>
                             </a>
                             <!-- Dropdown - Alerts -->
                             <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -218,8 +219,9 @@
                                 <h6 class="dropdown-header">
                                     notification
                                 </h6>
-                                @foreach (auth()->guard('admin')->user()->notifications as $noti)
-                                <a class="dropdown-item d-flex align-items-center" href="{{$noti->data['url']}}">
+                                @foreach (auth()->guard('admin')->user()->unreadNotifications as $noti)
+                                <a class="dropdown-item d-flex align-items-center unreadNotification" data-notificationId="{{$noti->id}}"
+                                    data-notificationUrl="{{$noti->data['url']}}" href="">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-primary">
                                             <i class="fas fa-file-alt text-white"></i>
@@ -234,8 +236,6 @@
                                 </a>
                                 @endforeach
                                
-                                <a class="dropdown-item text-center small text-gray-500" 
-                            href="#">Show All Alerts</a>
                             </div>
                         </li>
 
@@ -598,6 +598,41 @@
         }
 
     });
+
+    let unreadNotifications = document.querySelectorAll(".unreadNotification");
+    unreadNotifications.forEach(item => {
+    item.addEventListener('click', (event) => {
+        event.preventDefault()
+        const notificationId = item.dataset.notificationid;
+        const notificationUrl = item.dataset.notificationurl;
+      
+        const token = $('meta[name="csrf-token"]').attr('content');
+
+$.ajax({
+    url: `/admin/notification/${notificationId}/markAsRead?url=${notificationUrl}`,
+    type: 'PUT',
+    headers: {
+        'X-CSRF-TOKEN': token,
+        'Content-Type': 'application/json',
+    },
+    data: JSON.stringify({
+        _method: 'PUT',
+        url: notificationUrl,
+    }),
+    dataType: 'json',
+    success: function(data) {
+        window.location.href=data
+    },
+    error: function(error) {
+        alert(error.responseText);
+    }
+});
+
+    });
+    });
+
+
+
     </script>
 
     @livewireScripts
