@@ -39,15 +39,16 @@ class Index extends Component
         $id = request()->query('filter');
         $bloodRequestsQuery = $admin->bloodRequests()->where('status','pending');
         
-        if ($id) {
+
+        if ($id) {//asign id filtered
             $this->filter = $id;
             $bloodRequestsQuery->where('id', $id);
         }
         $bloodRequests = $bloodRequestsQuery
-            ->when($this->urgencyLevel != "", function ($query) {
+            ->when($this->urgencyLevel != "", function ($query) {//filter by urgency level
                 $query->where('urgency_level', $this->urgencyLevel);
             })
-            ->when($this->filter != 0,function ($q)
+            ->when($this->filter != 0,function ($q)//for view any blood request by id
             {
                 $q->where('id',$this->filter);
             })
@@ -55,8 +56,9 @@ class Index extends Component
                 $query->where(function ($subquery) use ($sumAvailableByType) {
                     $sumAvailableByType->each(function ($quantity, $bloodType) use ($subquery) {
                         $subquery->orWhere(function ($q) use ($bloodType, $quantity) {
-                            $q->where('blood_type_needed', $bloodType)
-                                ->where('quantity_needed', '<=', $quantity);
+                            $availabeTypes = $this->getAvailableBloodGroups($bloodType);//array of compatable types with specific type $bloodType
+                            $q->whereIn('blood_type_needed', $availabeTypes)//filter by avaialbe types
+                                ->where('quantity_needed', '<=', $quantity);//check quantity
                         });
                     });
                 });
@@ -69,5 +71,29 @@ class Index extends Component
         return view('livewire.admin.blood-request.index', compact('bloodRequests', 'sumAvailableByType'));
     }
     
+    private function getAvailableBloodGroups($bloodTypeNeeded)
+    {
+        $sign = $bloodTypeNeeded[-1];
+
+        $position = strpos($bloodTypeNeeded, $sign);
+
+        $bloodType = substr($bloodTypeNeeded, 0, $position);
+
+        $availabeBloodGroups = array(
+            'A' => array('A', 'AB'),
+            'B' => array('B', 'AB'),
+            'AB' => array('AB'),
+            'O' => array('A', 'B', 'AB', 'O')
+        );
+
+        foreach ($availabeBloodGroups as $type => &$availabe) {
+            foreach ($availabe as &$avaiablewithoutsign) {
+                $avaiablewithoutsign .= $sign;
+            }
+        }
+
+        return $availabeBloodGroups[$bloodType];
+   
+    }
     
 }
