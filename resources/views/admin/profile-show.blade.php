@@ -9,7 +9,7 @@
         <div class="row">
             <div class="col">
                 @if($admin->profile->avatar)
-                    <img src="{{asset('avatars/'.$admin->profile->avatar)}}" alt="">
+                    <img style="max-width: 300px;" src="{{asset('storage/'.$admin->profile->avatar)}}" alt="">
                 @else
                     <div class="noimage col-12 h-100">
                         no image

@@ -12,7 +12,7 @@ class ProfileController extends Controller
         return view('admin.profile');
     }
 
-    public function viewProfile($id){// shoe an admin profile
+    public function viewProfile($id){// show an admin profile
         $admin = Admin::with('profile')->findOrFail($id);
         return view('admin.profile-show',[
            'admin' => $admin

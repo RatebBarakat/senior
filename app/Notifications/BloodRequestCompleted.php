@@ -45,7 +45,7 @@ class BloodRequestCompleted extends Notification implements ShouldQueue
             return (new MailMessage)
                     ->line('blood request comleted.')
                     ->action('Notification Action', url('/'))
-                    ->line("your rewuest was resolve by {$this->admin->name} at {$this->bloodRequest->center->name}");
+                    ->line("your request was resolve by {$this->admin->name} at {$this->bloodRequest->center->name}");
    
         } catch (\Throwable $th) {
             Log::error($th->getMessage());

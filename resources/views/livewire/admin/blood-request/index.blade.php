@@ -61,9 +61,18 @@
                         
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="11" style="text-align-last: center" class="text-bloodRequest"> no bloodRequests </td>
-                    </tr>
+                @if ($filter == 0)
+                <tr>
+                    <td colspan="11" style="text-align-last: center" class="text-bloodRequest"> no bloodRequests </td>
+                </tr>
+                @else
+                <tr>
+                    <td colspan="11" style="text-align-last: center" class="text-bloodRequest">
+                         blood request was deleted or comelted by another admin
+                    </td>
+                </tr>
+                @endif
+                    
                 @endforelse
                 
                 </tbody>

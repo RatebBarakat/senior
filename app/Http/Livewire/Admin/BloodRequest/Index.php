@@ -32,7 +32,6 @@ class Index extends Component
         $availableDonationsByType = $availableDonations->groupBy('blood_type');
         
         $sumAvailableByType = $availableDonationsByType->map(fn($donations) => $donations->sum('quantity'));
-        
         $admin = auth()->guard('admin')->user();
         $admin->load(['bloodRequests' => function ($query) {
             $query->where('status', 'pending');
