@@ -81,14 +81,35 @@ class BloodRequestController extends Controller
 
     private function checkAvailableBlood(BloodRequest $bloodRequest)
     {
-        $donations = Donation::where(function ($q) use ($bloodRequest) {
+        $bloodTypeNeeded = $bloodRequest->blood_type_needed;
+        
+        $sign = $bloodTypeNeeded[-1];
+
+        $position = strpos($bloodTypeNeeded, $sign);
+
+        $bloodType = substr($bloodTypeNeeded, 0, $position);
+
+        $availabeBloodGroups = array(
+            'A' => array('A', 'AB'),
+            'B' => array('B', 'AB'),
+            'AB' => array('AB'),
+            'O' => array('A', 'B', 'AB', 'O')
+        );
+
+        foreach ($availabeBloodGroups as $type => &$availabe) {
+            foreach ($availabe as &$avaiablewithoutsign) {
+                $avaiablewithoutsign .= $sign;
+            }
+        }
+        
+        $donations = Donation::where(function ($q) use ($bloodRequest,$availabeBloodGroups,$bloodType,$sign) {
             $q->where('taken',0)
             ->where('center_id', auth()->guard('admin')->user()->center_id)
-            ->where('blood_type', $bloodRequest->blood_type_needed);
+            ->whereIn('blood_type', $availabeBloodGroups[$bloodType]);
         })->get();
     
         $sumAvailable = $donations->sum('quantity');
-    
+
         return [
             'donations' => $donations,
             'sum_available' => $sumAvailable

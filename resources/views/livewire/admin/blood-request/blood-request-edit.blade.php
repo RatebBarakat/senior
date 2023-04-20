@@ -85,7 +85,7 @@
                                 @forelse ($AvailableBLood as $blood)
                                     <button type="button" wire:loading.attr="disabled"
                                     class="btn btn-sm btn-success" wire:click="addBlood({{$blood->id}})">
-                                        {{$blood->quantity}} litter
+                                        {{$blood->blood_type}} {{$blood->quantity}} litter
                                     </button>
                                 @empty
                                     no blood available
