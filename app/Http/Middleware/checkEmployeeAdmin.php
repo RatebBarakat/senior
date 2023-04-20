@@ -19,6 +19,10 @@ class checkEmployeeAdmin
             abort(404);
         }
 
+        if (is_null(auth()->guard('admin')->user()->center_id)) {
+            abort(404,'you are assign to any center');
+        }
+
         return $next($request);
     }
 }

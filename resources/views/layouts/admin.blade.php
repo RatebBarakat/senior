@@ -102,7 +102,6 @@
                 @endif
             @endcan
 
-
             @can('manage-appointments')
             <li class="nav-item">
                 <a href="{{route('admin.appointments.index')}}" class="nav-link">

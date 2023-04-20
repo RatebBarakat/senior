@@ -85,12 +85,6 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
     Route::get('/profile/',[ProfileController::class,'index'])
         ->name('profile');
 
-    Route::prefix('blood-request')->name('blood-request.')->group(function ()
-    {
-        Route::view('/', 'admin.blood-request.index')->name('index');
-       Route::get('/{id}',[AdminBloodRequestController::class,'show'])->name('show');
-       Route::post('/unlock',[AdminBloodRequestController::class,'unLock'])->name('unLock');
-    });
 
    Route::middleware('superAdmin')->group(function (){
 
@@ -117,8 +111,18 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
       Route::view('/','admin.center.index')->name('index');
    });
 
-   Route::middleware(['employee'])->name('appointments.')->group(function () {
-      Route::view('/appointments','admin.appointment.index')->name('index');
+    Route::middleware(['employee'])->group(function () {
+        Route::prefix('blood-request')->name('blood-request.')->group(function ()
+        {
+            Route::view('/', 'admin.blood-request.index')->name('index');
+            Route::get('/{id}',[AdminBloodRequestController::class,'show'])->name('show');
+            Route::post('/unlock',[AdminBloodRequestController::class,'unLock'])->name('unLock');
+        });
+
+        Route::name('appointments.')->group(function ()
+        {
+            Route::view('/appointments','admin.appointment.index')->name('index');            
+        });
    });
 });
 

@@ -27,6 +27,7 @@ class Appointments extends Component
     public function mount()
     {
         if (!auth()->guard('admin')->user()->isEmployee())abort(403);
+        if (is_null(auth()->guard('admin')->user()->center_id))abort(404,'you are nto an employee of any center');
     }
 
     public function render()
