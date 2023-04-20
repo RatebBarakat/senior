@@ -29,6 +29,7 @@
         <input class="form-control" type="text" value="{{$location->name}}" id="city" name="name" placeholder="Location Name">
         <button class="btn btn-primary" type="submit">update Location</button>
     </div>
+    <button class="btn btn-primary ml-3" onclick="$('#deletModal').modal('show')" type="submit">delete Location</button>
     <input type="hidden" name="latitude" id="latitude">
     <input type="hidden" name="longitude" id="longitude">
 </form>

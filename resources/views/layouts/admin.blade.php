@@ -219,7 +219,7 @@
                                 <h6 class="dropdown-header">
                                     notification
                                 </h6>
-                                @foreach (auth()->guard('admin')->user()->unreadNotifications as $noti)
+                                @forelse (auth()->guard('admin')->user()->unreadNotifications as $noti)
                                 <a class="dropdown-item d-flex align-items-center unreadNotification" data-notificationId="{{$noti->id}}"
                                     data-notificationUrl="{{$noti->data['url']}}" href="">
                                     <div class="mr-3">
@@ -234,7 +234,9 @@
                                         </span>
                                     </div>
                                 </a>
-                                @endforeach
+                                @empty
+                                <p class="dropdown-item d-flex align-items-center">no new notification</p>
+                                @endforelse
                                
                             </div>
                         </li>
