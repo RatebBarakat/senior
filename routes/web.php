@@ -100,6 +100,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
             Route::post('/create',[LocationController::class,'store'])->name('store');
             Route::get('/edit/{id}',[LocationController::class,'edit'])->name('edit');
             Route::post('/update/{id}',[LocationController::class,'update'])->name('update');
+            Route::post('/delete/{id}',[LocationController::class,'delete'])->name('delete');
         });
        Route::view('/roles','admin.super.roles')->name('roles');
 

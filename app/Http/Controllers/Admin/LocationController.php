@@ -74,4 +74,14 @@ class LocationController extends Controller
     
     }
 
+    public function delete(int $id)
+    {
+        $location = Location::find($id);
+        if (!$location) {
+            return response()->json('location not found',404);
+        }
+        $location->delete();
+        return response()->json('location deleted successfully');
+    }
+
 }

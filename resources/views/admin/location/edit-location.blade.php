@@ -28,11 +28,12 @@
     <div class="form-group mt-3">
         <input class="form-control" type="text" value="{{$location->name}}" id="city" name="name" placeholder="Location Name">
         <button class="btn btn-primary" type="submit">update Location</button>
+<button class="btn btn-danger ml-3" id="openDelete" type="button">delete Location</button>
     </div>
-    <button class="btn btn-primary ml-3" onclick="$('#deletModal').modal('show')" type="submit">delete Location</button>
     <input type="hidden" name="latitude" id="latitude">
     <input type="hidden" name="longitude" id="longitude">
 </form>
+
 
 @endsection
 
@@ -41,6 +42,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://unpkg.com/leaflet-control-geocoder@1.13.1/dist/Control.Geocoder.js"></script>
 <script src="https://unpkg.com/esri-leaflet-geocoder@2.3.0/dist/esri-leaflet-geocoder.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 <script>
     var mymap = L.map('mapid');
     var lat =  {!! $location->latitude !!};
@@ -125,5 +127,28 @@ $.ajax({
         }
 });
 });
+ 
+$('#openDelete').click(function() {
+    var token = '{{ csrf_token() }}'; // Retrieve the CSRF token
+    if (confirm('Are you sure you want to perform this action?')) {
+        $.ajax({
+    url: `{{ route("admin.location.delete", ":id") }}`.replace(':id', id),
+    method: 'POST',
+    headers: {
+        'X-CSRF-TOKEN': token // Set the CSRF token in the headers
+    },
+    success: function(response) {
+        // Handle success response
+        alert('Location deleted successfully!');
+        marker.remove();
+        marker = null;
+        window.location.href = "/admin/location"
+    },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error(errorThrown);
+            alert(jqXHR.responseText);
+        }
+});
+}});  
 </script>
 @endpush
