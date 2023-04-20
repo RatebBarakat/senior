@@ -45,7 +45,7 @@ class DashboardController extends Controller
         
             DB::enableQueryLog();
             
-            $centerId = $user->role->name == "center-admin" ? $user->center->id : $user->center_id;
+            $centerId = $user->role->name == "center-admin" ? $user->center?->id ?? 0 : $user->center_id;
 
             $donationsWeek = Donation::with('center')
                 ->select('blood_type', DB::raw('SUM(quantity) AS total_donated'))
