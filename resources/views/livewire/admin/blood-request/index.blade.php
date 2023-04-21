@@ -19,6 +19,7 @@
                 <input type="search" name="" placeholder="search..." id="search" class="form-control"
                        wire:model="search">
             </div>
+            
             <table class="table">
                 <thead class="bg-primary">
                 <td class="text-white">#</td>
@@ -48,8 +49,7 @@
                         <td>{{$bloodRequest->status}}</td>
                         <td>
                             <a  
-                                @if(!isset($sumAvailableByType[$bloodRequest->blood_type_needed]) 
-                                || $sumAvailableByType[$bloodRequest->blood_type_needed] < $bloodRequest->quantity_needed)
+                                @if($availableBloods[$bloodRequest->blood_type_needed] < $bloodRequest->quantity_needed)
                                 style="cursor: not-allowed;" href="javascript:void(0)"  
                                 @else 
                                 href="{{route('admin.blood-request.show',[$bloodRequest->id])}}"                               

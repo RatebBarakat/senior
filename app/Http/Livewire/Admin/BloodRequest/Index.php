@@ -9,9 +9,22 @@ use Livewire\Component;
 
 class Index extends Component
 {
+    const CAN_GIVE_TO = [
+    'A+' => ['A+', 'AB+'],
+    'A-' => ['A-', 'A+', 'AB-', 'AB+'],
+    'B+' => ['B+', 'AB+'],
+    'B-' => ['B-', 'B+', 'AB-', 'AB+'],
+    'AB+' => ['AB+'],
+    'AB-' => ['AB-', 'AB+'],
+    'O+' => ['O+', 'A+', 'B+', 'AB+'],
+    'O-' => ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+    ];
+
     public int $filter = 0;
     public bool $canComplete = false;
     public string $urgencyLevel = "";
+
+    public array $availableBloods = [];
  
     protected $queryString = [
         'filter' => ['except' => 0],
@@ -31,69 +44,76 @@ class Index extends Component
         
         $availableDonationsByType = $availableDonations->groupBy('blood_type');
         
-        $sumAvailableByType = $availableDonationsByType->map(fn($donations) => $donations->sum('quantity'));
+        $sumAvailableDonationByType = $availableDonationsByType
+                ->map(fn($donations) => $donations->sum('quantity'));//get the sum availble foreach type
+
+
+        $this->availableBloods = $this->getSumCanReceiveFrom($sumAvailableDonationByType);
         $admin = auth()->guard('admin')->user();
         $admin->load(['bloodRequests' => function ($query) {
             $query->where('status', 'pending');
         }]);
+
         $id = request()->query('filter');
         $bloodRequestsQuery = $admin->bloodRequests()->where('status','pending');
-        
-
         if ($id) {//asign id filtered
             $this->filter = $id;
             $bloodRequestsQuery->where('id', $id);
         }
+
         $bloodRequests = $bloodRequestsQuery
-            ->when($this->urgencyLevel != "", function ($query) {//filter by urgency level
-                $query->where('urgency_level', $this->urgencyLevel);
-            })
-            ->when($this->filter != 0,function ($q)//for view any blood request by id
-            {
-                $q->where('id',$this->filter);
-            })
-            ->when($this->canComplete && !$sumAvailableByType->isEmpty(), function ($query) use ($sumAvailableByType) {
-                $query->where(function ($subquery) use ($sumAvailableByType) {
-                    $sumAvailableByType->each(function ($quantity, $bloodType) use ($subquery) {
-                        $subquery->orWhere(function ($q) use ($bloodType, $quantity) {
-                            $availabeTypes = $this->getAvailableBloodGroups($bloodType);//array of compatable types with specific type $bloodType
-                            $q->whereIn('blood_type_needed', $availabeTypes)//filter by avaialbe types
-                                ->where('quantity_needed', '<=', $quantity);//check quantity
-                        });
+        ->when($this->urgencyLevel != "", function ($query) {//filter by urgency level
+            $query->where('urgency_level', $this->urgencyLevel);
+        })
+        ->when($this->filter != 0,function ($q)//for view any blood request by id
+        {
+            $q->where('id',$this->filter);
+        })
+        ->when($this->canComplete && !$sumAvailableDonationByType->isEmpty(), function ($query) use ($sumAvailableDonationByType) {
+            $sumAvailableForBloodGroups = $this->availableBloods;
+            $query->where(function ($subquery) use ($sumAvailableForBloodGroups) {
+                foreach ($sumAvailableForBloodGroups as $bloodType => $sumAvailable) {//sum available to give
+                    $subquery->orWhere(function ($subquery2) use ($bloodType, $sumAvailable) {
+                        $subquery2->where('blood_type_needed', $bloodType)
+                                  ->where('quantity_needed', '<=', $sumAvailable);
                     });
-                });
-            })    
-            ->when($this->canComplete && $sumAvailableByType->isEmpty(), function ($query) {
-                $query->whereRaw('false');
-            })        
-            ->get();
-        
-        return view('livewire.admin.blood-request.index', compact('bloodRequests', 'sumAvailableByType'));
+                }
+            });
+        })          
+        ->when($this->canComplete && $sumAvailableDonationByType->isEmpty(), function ($query) {
+            $query->whereRaw('false');
+        })        
+        ->get();
+
+
+        return view('livewire.admin.blood-request.index', compact('bloodRequests', 'sumAvailableDonationByType'));
     }
     
-    private function getAvailableBloodGroups($bloodTypeNeeded)
+
+    private function getSumCanReceiveFrom($sumAvailableDonationByType)
     {
-        $sign = $bloodTypeNeeded[-1];
+        $canGiveTo = [
+            'A+' => 0,
+            'A-' => 0,
+            'B+' => 0,
+            'B-' => 0,
+            'AB+' => 0,
+            'AB-' => 0,
+            'O+' => 0,
+            'O-' => 0
+        ];
 
-        $position = strpos($bloodTypeNeeded, $sign);
+        $intersect = array_intersect_key(self::CAN_GIVE_TO, $sumAvailableDonationByType->toArray());
 
-        $bloodType = substr($bloodTypeNeeded, 0, $position);
-
-        $availabeBloodGroups = array(
-            'A' => array('A', 'AB'),
-            'B' => array('B', 'AB'),
-            'AB' => array('AB'),
-            'O' => array('A', 'B', 'AB', 'O')
-        );
-
-        foreach ($availabeBloodGroups as $type => &$availabe) {
-            foreach ($availabe as &$avaiablewithoutsign) {
-                $avaiablewithoutsign .= $sign;
+        foreach ($intersect as $type => $canReceive) {
+            foreach ($canReceive as $canGive) {
+                $canGiveTo[$canGive] += $sumAvailableDonationByType[$type];
             }
         }
 
-        return $availabeBloodGroups[$bloodType];
-   
+        return $canGiveTo;
     }
+
+
     
 }

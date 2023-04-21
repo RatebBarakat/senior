@@ -15,16 +15,28 @@ use SysvSemaphore;
 
 class BloodRequestController extends Controller
 {
+    const CAN_RECEIVE_FROM = [
+        'A+' => ['A+', 'A-', 'O+', 'O-'],
+        'A-' => ['A-', 'O-'],
+        'B+' => ['B+', 'B-', 'O+', 'O-'],
+        'B-' => ['B-', 'O-'],
+        'AB+' => ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+        'AB-' => ['AB-', 'A-', 'B-', 'O-'],
+        'O+' => ['O+', 'A+', 'B+', 'AB+'],
+        'O-' => ['O-']
+    ];
+
     public function show(int $id)
     {
         $bloodRequest = BloodRequest::findOrFail($id);
     
         $AvailableBLoodArray = $this->checkAvailableBlood($bloodRequest);
         $AvailableBLood = $AvailableBLoodArray['donations'];
+
         if (count($AvailableBLoodArray['donations']) <= 0) {
             $this->resetLockedBy($bloodRequest);
             return redirect('/admin')->with('error', 'There are no available donations at your center.');
-        }elseif ($AvailableBLoodArray['sum_available'] < $bloodRequest->quantity_needed) {
+        }elseif ($AvailableBLoodArray['sumAvailable'] < $bloodRequest->quantity_needed) {
             $this->resetLockedBy($bloodRequest);
             return redirect('/admin')->with('error', 'There are no enouth quantity
              donations at your center.');
@@ -83,37 +95,18 @@ class BloodRequestController extends Controller
     {
         $bloodTypeNeeded = $bloodRequest->blood_type_needed;
         
-        $sign = $bloodTypeNeeded[-1];
-
-        $position = strpos($bloodTypeNeeded, $sign);
-
-        $bloodType = substr($bloodTypeNeeded, 0, $position);
-
-        $availabeBloodGroups = array(
-            'A' => array('A', 'AB'),
-            'B' => array('B', 'AB'),
-            'AB' => array('AB'),
-            'O' => array('A', 'B', 'AB', 'O')
-        );
-
-        foreach ($availabeBloodGroups as $type => &$availabe) {
-            foreach ($availabe as &$avaiablewithoutsign) {
-                $avaiablewithoutsign .= $sign;
-            }
-        }
-        
-        $donations = Donation::where(function ($q) use ($bloodRequest,$availabeBloodGroups,$bloodType,$sign) {
+        $donations = Donation::where(function ($q) use ($bloodRequest,$bloodTypeNeeded) {
             $q->where('taken',0)
-            ->where('center_id', auth()->guard('admin')->user()->center_id)
-            ->whereIn('blood_type', $availabeBloodGroups[$bloodType]);
+                ->where('center_id', auth()->guard('admin')->user()->center_id)
+                ->whereIn('blood_type', self::CAN_RECEIVE_FROM[$bloodTypeNeeded]);
         })->get();
-    
         $sumAvailable = $donations->sum('quantity');
 
         return [
             'donations' => $donations,
-            'sum_available' => $sumAvailable
+            'sumAvailable' => $sumAvailable
         ];
+        
     }
     
 }
