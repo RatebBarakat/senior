@@ -95,7 +95,7 @@ class Admins extends Component
             'name' => $this->name,
             'email' => $this->email,
             'password' => Hash::make($this->password),
-            'role_id' => $this->role_id == null ? null : (int) $this->role_id
+            'role_id' => $this->role_id ?? null
         ]);
         $this->alert('success','admin addedd successfully');
 

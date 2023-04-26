@@ -591,7 +591,8 @@
         //     icon: event.detail.type,
         //     text: event.detail.message,
         // })
-        console.log(event.detail)
+        // console.log(event.detail)
+        // alert(event.detail.message)
         if(event.detail.type === "success") {
             toastr.success(event.detail.message);
         }else{
