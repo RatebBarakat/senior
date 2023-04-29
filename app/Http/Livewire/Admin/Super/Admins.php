@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Admin\Super;
 
 use App\Models\Admin;
 use App\Models\Role;
+use App\Notifications\NotifyAdminPassword;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -11,6 +12,7 @@ use Illuminate\Validation\Rules\Password;
 use Lean\LivewireAccess\WithImplicitAccess;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Str;
 
 class Admins extends Component
 {
@@ -82,8 +84,8 @@ class Admins extends Component
         $this->validate([
             'name' => 'required|string|min:2',
             'email' => 'required|email|unique:admins',
-            'password' => ['required',Password::min(8)->mixedCase()],
-            'passwordConfirm' => 'required|same:password',
+            // 'password' => ['required',Password::min(8)->mixedCase()],
+            // 'passwordConfirm' => 'required|same:password',
             'role_id' => ['required', 'integer',Rule::exists('roles', 'id')],
         ],[
             'role_id.required' => 'the role field is required',
@@ -91,13 +93,23 @@ class Admins extends Component
             'role_id.exists' => 'the selected role doeasnt exists ',
         ]);
 
-        Admin::create([
+        $token = Str::random(40);
+
+        $admin = Admin::create([
             'name' => $this->name,
             'email' => $this->email,
-            'password' => Hash::make($this->password),
-            'role_id' => $this->role_id ?? null
+            'password' => "",
+            'role_id' => $this->role_id ?? null,
+            'password_token' => $token
         ]);
-        $this->alert('success','admin addedd successfully');
+
+        try {
+            $admin->notify(new NotifyAdminPassword($admin,$token));
+        } catch (\Throwable $th) {
+            dd($th->getMessage());
+        }
+
+        $this->alert('success','admin added successfully');
 
         $this->hideAddModal();
     }

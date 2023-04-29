@@ -23,7 +23,8 @@ class Admin extends Authenticatable
         'email',
         'password',
         'role_id',
-        'center_id'
+        'center_id',
+        'password_token'
     ];
 
     public function attachRole($roleName)

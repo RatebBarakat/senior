@@ -116,18 +116,6 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="">password</label>
-                            <span class="text-danger">@error('password'){{$message}}@enderror</span>
-                            <input type="password" wire:model.defer="password" class="form-control">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="">password confirm</label>
-                            <span class="text-danger">@error('passwordConfirm'){{$message}}@enderror</span>
-                            <input type="password" wire:model.defer="passwordConfirm" class="form-control">
-                        </div>
-
-                        <div class="form-group">
                             <label for="admin-admin">admin</label>
                             <span class="text-danger">@error('role_id'){{$message}}@enderror</span>
                             <select name="" id="" wire:model.defer="role_id" class="custom-select">

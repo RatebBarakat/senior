@@ -64,7 +64,7 @@
                     <span class="text-danger">@error('email'){{$message}}@enderror</span>
                     <input type="email" wire:model.defer="email" class="form-control">
                 </div>
-
+{{-- 
                 <div class="form-group">
                     <label for="">password</label>
                     <span class="text-danger">@error('password'){{$message}}@enderror</span>
@@ -75,7 +75,7 @@
                     <label for="">password confirm</label>
                     <span class="text-danger">@error('passwordConfirm'){{$message}}@enderror</span>
                     <input type="password" wire:model.defer="passwordConfirm" class="form-control">
-                </div>
+                </div> --}}
                 <button type="submit" wire:loading.attr="disabled" wire:target="createCenterAdmin"
                         class="btn btn-success mt-1 col-12 btn-block">
                     create center admin

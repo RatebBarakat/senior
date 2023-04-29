@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminPasswordController;
 use App\Http\Controllers\Admin\BloodRequestController as AdminBloodRequestController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\ProfileController;
@@ -58,6 +59,10 @@ Route::get('auth/{provider}/callback', [SocialLoginController::class, 'handleCal
 Route::get('/login',function (){
    \Illuminate\Support\Facades\Auth::guard('admin')->login(\App\Models\Admin::first());
 });
+
+Route::get('/admin/set-password/{id}/{token}',[AdminPasswordController::class,'show'])->name('admin.setPassword');
+Route::post('/admin/set-password/{id}/{token}',[AdminPasswordController::class,'setPassword'])->name('admin.storePassword');
+
 
 Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function (){
 

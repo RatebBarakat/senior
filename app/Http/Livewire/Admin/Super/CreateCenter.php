@@ -6,12 +6,14 @@ use App\Models\Admin;
 use App\Models\DonationCenter;
 use App\Models\Location;
 use App\Models\Role;
+use App\Notifications\NotifyAdminPassword;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Lean\LivewireAccess\WithImplicitAccess;
 use Livewire\Component;
+use Illuminate\Support\Str;
 
 class CreateCenter extends Component
 {
@@ -20,8 +22,8 @@ class CreateCenter extends Component
 
     public ?string $adminName = "";
     public ?string $email = "";
-    public ?string $password = null;
-    public ?string $passwordConfirm = null;
+    // public ?string $password = null;
+    // public ?string $passwordConfirm = null;
     public string|int $adminCenter = "";
     public ?string $centerName = null;
     public string|int $location = "";
@@ -42,17 +44,28 @@ class CreateCenter extends Component
         $this->validate([
             'adminName' => 'required|string|min:2',
             'email' => 'required|email|unique:admins',
-            'password' => ['required',Password::min(8)->mixedCase()],
-            'passwordConfirm' => 'required|same:password',
+            // 'password' => ['required',Password::min(8)->mixedCase()],
+            // 'passwordConfirm' => 'required|same:password',
         ]);
+
+        $token = Str::random(40);
 
         $admin = Admin::create([
             'name' => $this->adminName,
             'email' => $this->email,
-            'password' => Hash::make($this->password),
-            'role_id' => $centerAdminRole->id
+            'password' => "",
+            'role_id' => $centerAdminRole->id,
+            'password_token' => $token
         ]);
+
+        try {
+            $admin->notify(new NotifyAdminPassword($admin,$token));
+        } catch (\Throwable $th) {
+            dd($th->getMessage());
+        }
+
         $this->adminCenter = $admin->id;
+
         $this->alert('success'," admin of center added successfully");
 
     }
