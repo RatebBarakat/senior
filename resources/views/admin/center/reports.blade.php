@@ -4,9 +4,10 @@
 @endsection
 
 @section('content')
-    <h4>{{auth()->guard('admin')->user()->center->name}} reports</h4>
+    <h2>{{auth()->guard('admin')->user()->center->name}} reports</h2>
     <form action="{{route('admin.admincenter.reports.store')}}" method="post">
         @csrf
+        <h3>the report must include</h3>
         <div class="d-flex">
             <span class="p-2">
                 <label for="bloodStocks">blood stocks</label>
@@ -21,6 +22,11 @@
                 <input type="checkbox" name="needed[]" value="bloodRequests" id="bloodRequests">
             </span>
         </div>
+        <hr>
+        <span class="p-2">
+            <label for="save">save the report file</label>
+            <input type="checkbox" name="save" id="save">
+        </span><br>
         <button class="btn btn-success" type="submit">generate</button>
     </form>
 @endsection

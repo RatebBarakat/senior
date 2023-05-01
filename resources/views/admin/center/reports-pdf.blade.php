@@ -66,7 +66,7 @@ table th:last-child {
 </head>
 
 <body>
- <h4>{{ auth()->guard('admin')->user()->center->name }} reports</h4>
+    <h1 style="text-align: center;color: blue">{{ auth()->guard('admin')->user()->center->name }} reports</h1>
 
     @php
         $needed = [
@@ -78,7 +78,7 @@ table th:last-child {
 
     @foreach ($needed as $key => $value)
         @if (array_key_exists($key, $data))
-            <h1 style="color: blue">{{ $value }}</h1>
+            <h2>{{ $value }}</h2>
             @if ($key == 'employees')
                 <table class="table table-bordered table-striped">
                     <thead>
