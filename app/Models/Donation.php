@@ -14,7 +14,7 @@ class Donation extends Model
 
     public function center()
     {
-        return $this->belongsTo(DonationCenter::class,'center_id ','id');
+        return $this->belongsTo(DonationCenter::class);
     }
 
     public function user()

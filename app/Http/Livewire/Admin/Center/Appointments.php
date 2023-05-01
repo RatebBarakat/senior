@@ -34,9 +34,11 @@ class Appointments extends Component
     {
         $admin = auth()->guard('admin')->user();
         $admin->load(['employeeCenter','employeeCenter.appointments' => function ($query) {
-            $query->scheduled()->with('user')->whereBetween('date',[Carbon::parse(now())->format('y-m-d'),
-            Carbon::parse(now()->addWeek())->format('y-m-d')]);
-        }]);     
+            // $query->scheduled()->with('user')->whereBetween('date',[Carbon::parse(now())->format('y-m-d'),
+            // Carbon::parse(now()->addWeek())->format('y-m-d')]);
+            $query->scheduled()->with('user')->where('date','>',Carbon::parse(now())->format('y-m-d'));
+        }]);    
+
         $appointments = $admin->employeeCenter->appointments;
         
         return view('livewire.admin.center.appointments',compact('appointments'));

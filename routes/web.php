@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Api\BloodRequestController;
 use App\Http\Controllers\Api\SocialLoginController;
+use App\Http\Controllers\Center\ReportController;
 use App\Mail\SendPdfEmail as MailSendPdfEmail;
 use App\Models\Permission;
 use App\Models\Role;
@@ -114,6 +115,8 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
    Route::middleware('centerAdmin')->name('admincenter.')
        ->prefix('center')->group(function (){
       Route::view('/','admin.center.index')->name('index');
+      Route::view('/report','admin.center.reports')->name('reports');
+      Route::post('/report/create',[ReportController::class,'generateReport'])->name('reports.store');
    });
 
     Route::middleware(['employee'])->group(function () {
