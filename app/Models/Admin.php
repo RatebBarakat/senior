@@ -67,7 +67,6 @@ class Admin extends Authenticatable
         return $this->role && $this->role->name == "center-employee";
     }
 
-
     public function hasPermission($name)
     {
         return $this->role && $this->role->permissions->contains('name', $name);

@@ -7,7 +7,6 @@ use App\Models\Permission;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
-use Lean\LivewireAccess\WithExplicitAccess;
 use Lean\LivewireAccess\WithImplicitAccess;
 use Livewire\Component;
 use Livewire\WithPagination;
