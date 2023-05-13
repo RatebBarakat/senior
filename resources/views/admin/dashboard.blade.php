@@ -12,7 +12,6 @@
     </canvas>
     <div class="row">
 
-        <!-- Earnings (Monthly) Card Example -->
         <a class="col-xl-3 col-lg-6 mb-4">
             <div class="card border-left-primary shadow h-100 py-2">
                 <div class="card-body">
@@ -29,7 +28,6 @@
                 </div>
             </div>
         </a>
-        <!-- Earnings (Monthly) Card Example -->
         <a class="col-xl-3 col-md-6 mb-4"
          >
             <div class="card border-left-success shadow h-100 py-2">
@@ -48,7 +46,6 @@
             </div>
         </a>
 
-        <!-- Earnings (Monthly) Card Example -->
         <a href="" class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-info shadow h-100 py-2">
                 <div class="card-body">
@@ -77,7 +74,6 @@
             </div>
         </a>
 
-        <!-- Pending Requests Card Example -->
         <a href="" class="col-xl-3 col-md-6 mb-4">
             <div class="card border-left-warning shadow h-100 py-2">
                 <div class="card-body">
@@ -97,6 +93,25 @@
     </div>
 
     <div class="row gy-4">
+        <div class="col-12">
+            <form action="" method="get" class="mb-3">
+                <span class="d-dlex">
+                    <select name="center" id="center" class="custom-select w-25">
+                        <option value="">filter by center</option>
+                        @foreach ($centers as $center)
+                            <option @selected(request()->get('center') == $center->id) value="{{$center->id}}">{{$center->name}}</option>
+                        @endforeach
+                    </select>
+                    <button type="submit" class="btn btn-success ml-2">filter</button>
+                    @if (request()->has('center'))
+                        <a class="btn btn-primary ml-2" href="{{url()->current()}}">remove filter</a>
+                    @endif
+                </span>
+            </form>
+
+            
+        </div>
+        
         <div class="col-lg-6 mb-4">
           <div class="wrapper bg-white shadow border p-2 radius">
             <p>blood donated last week</p>
