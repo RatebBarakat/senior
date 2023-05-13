@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Center;
 use App\Http\Controllers\Controller;
 use App\Models\CenterReport;
 use App\Models\Donation;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use TCPDF;
 
@@ -75,9 +76,16 @@ class ReportController extends Controller
     }
     private function getBloods()
     {
-        return Donation::with('center')->where([
-            ['center_id', '=',  auth()->guard('admin')->user()->center->id]
-        ])->get();
+        return [
+            'expire' => Donation::with('center')->where([
+                ['center_id', '=',  auth()->guard('admin')->user()->center->id],
+                ['expire_at','<',Carbon::now()->format('y-m-d')]
+            ])->get(),
+            'nonExpire' => Donation::with('center')->where([
+                ['center_id', '=',  auth()->guard('admin')->user()->center->id],
+                ['expire_at','>',Carbon::now()->format('y-m-d')]
+            ])->get(),
+        ];
     }
 
     private function getEmployees()
