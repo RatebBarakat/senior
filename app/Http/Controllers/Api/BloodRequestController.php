@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Jobs\NotifyAdminsBloodRequest;
 use App\Models\BloodRequest;
+use App\Models\Donation;
+use App\Models\DonationCenter;
 use App\Traits\ResponseApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -38,9 +40,52 @@ class BloodRequestController extends Controller
             return $this->validationErrors($validator->errors());
         }
 
-        $bloodRequest = BloodRequest::create($validator->validated());
-        dispatch(new NotifyAdminsBloodRequest($bloodRequest));
-        return $this->successResponse(['bloodRequest' => $bloodRequest],'request addedd successfully');
+        $center = DonationCenter::findOrFail($request->input('center_id'));
+
+        if ($this->checkCompatibility($center,$request->input('blood_type_needed'),$request->input('quantity_needed'))) {
+            $bloodRequest = BloodRequest::create($validator->validated());
+            dispatch(new NotifyAdminsBloodRequest($bloodRequest));
+            return $this->successResponse(['bloodRequest' => $bloodRequest],'request addedd successfully');
+        }
+        
+        $center = $this->getAvailableCenter($request->input('blood_type_needed'),$request->input('quantity_needed'));
+
+        if (is_null($center)) {
+            return response()->json([
+                'error' => "there no center have {$request->input('blood_type_needed')} of type {$request->input('quantity_needed')}"
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'selected center dont have enough quanatity of this blood type',
+                'availabe-center' => $center
+            ]);
+        }
+        
+    }
+
+    private function checkCompatibility(DonationCenter $center,$bloodTypeNeeded,$quantityNeeded)
+    {
+        $availableQuantity = Donation::where([
+            ['blood_type','=',$bloodTypeNeeded],
+            ['center_id','=',$center->id],
+        ])->sum('quantity');
+        
+        if ($quantityNeeded > $availableQuantity) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function getAvailableCenter($bloodTypeNeeded,$quantityNeeded)
+    {
+        $center = DonationCenter::whereHas('donations', function ($query) use ($bloodTypeNeeded,$quantityNeeded) {
+            $query->where([
+                ['blood_type', $bloodTypeNeeded],
+            ])->havingRaw('SUM(quantity) > ?', [$quantityNeeded]);
+        })->first();
+
+        return $center ?? null;
     }
 
     public function show(int $id)
