@@ -10,6 +10,10 @@ class Donation extends Model
 {
     use HasFactory;
 
+    protected $casts = [
+        'expire_at' => 'date'
+    ];
+
     protected $guarded = [];
 
     public function center()
