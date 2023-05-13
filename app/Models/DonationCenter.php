@@ -34,6 +34,11 @@ class DonationCenter extends Model
         return $this->hasMany(Appointment::class,'center_id');
     }
 
+    public function donations()
+    {
+        return $this->hasMany(Donation::class,'center_id');
+    }
+
     public function employees()
     {
         return $this->hasMany(Admin::class,'center_id')
