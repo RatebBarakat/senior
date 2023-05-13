@@ -8,6 +8,7 @@
     <title>    {{auth()->guard('admin')->user()->center->name}} | report
     </title>
     <link rel="stylesheet" href="{{asset('css/bootstrap.min.css')}}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         
     <style>
@@ -75,7 +76,7 @@ table th:last-child {
             'bloodRequests' => 'blood requests'
         ];
     @endphp
-
+    
     @foreach ($needed as $key => $value)
         @if (array_key_exists($key, $data))
             <h2>{{ $value }}</h2>
@@ -83,7 +84,6 @@ table th:last-child {
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Name</th>
                             <th>Email</th>
                             <th>center id</th>
@@ -92,7 +92,6 @@ table th:last-child {
                     <tbody>
                         @forelse ($data[$key] as $employee)
                             <tr>
-                                <td>{{ $employee->id }}</td>
                                 <td>{{ $employee->name }}</td>
                                 <td>{{ $employee->email }}</td>
                                 <td>{{ $employee->employeeCenter?->name }}</td>
@@ -108,7 +107,6 @@ table th:last-child {
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Name</th>
                             <th>Blood Type</th>
                             <th>Quantity</th>
@@ -118,7 +116,6 @@ table th:last-child {
                     <tbody>
                         @forelse ($data[$key] as $request)
                             <tr>
-                                <td>{{ $request->id }}</td>
                                 <td>{{ $request->user->name }}</td>
                                 <td>{{ $request->blood_type }}</td>
                                 <td>{{ $request->quantity }}</td>
@@ -131,24 +128,56 @@ table th:last-child {
                         @endforelse
                     </tbody>
                 </table>
-            @else
-                <table class="table table-bordered table-striped">
+            
+            @else  
+            
+                <ul>
+                    <li><h3>expire</h3></li> <br>
+                     <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Blood Type</th>
+                                    <th>Quantity</th>
+                                    <th>center</th>
+                                    <th>expire at</th>
+                                    <th>Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($data[$key]['expire'] as $blood)
+                                    <tr>
+                                        <td>{{ $blood->blood_type }}</td>
+                                        <td>{{ $blood->quantity }}</td>
+                                        <td>{{ $blood->center->name }}</td>
+                                        <td>{{$blood->expire_at->diffForHumans()}}</td>
+                                        <td>{{ $blood->created_at }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center">No records found.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>   
+                    
+                    <li><h3>non expire</h3></li> <br>
+                    <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Blood Type</th>
                             <th>Quantity</th>
                             <th>center</th>
+                            <th>expire at</th>
                             <th>Created At</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($data[$key] as $blood)
+                        @forelse ($data[$key]['nonExpire'] as $blood)
                             <tr>
-                                <td>{{ $blood->id }}</td>
                                 <td>{{ $blood->blood_type }}</td>
                                 <td>{{ $blood->quantity }}</td>
                                 <td>{{ $blood->center->name }}</td>
+                                <td>{{$blood->expire_at->diffForHumans()}}</td>
                                 <td>{{ $blood->created_at }}</td>
                             </tr>
                         @empty
@@ -157,15 +186,17 @@ table th:last-child {
                             </tr>
                         @endforelse
                     </tbody>
-                </table>
+                    </table>
+                </ul>
+
+                
+            </div>
+            
             @endif
         @endif
     @endforeach
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script defer src="{{asset('js/bootstrap.bundle.min.js')}}"></script>
-    <script defer src="{{asset('js/bootstrap.bundle.js')}}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+            
 </body>
 </html>
 
