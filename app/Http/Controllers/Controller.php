@@ -21,12 +21,24 @@ class Controller extends BaseController
             'email' => 'required|email',
             'password' => ['required',Password::min(8)],
         ]);
+        $guard = '';
+        $class = '';
+        $redirect = '';
+        if (str_ends_with($request->input('email'),'@live.bd.lb')) {
+            $guard = 'admin';
+            $class = "\\App\\Models\\Admin";
+            $redirect = '/admin';
+        }else{
+            $guard = 'web';
+            $class = "\\App\\Models\\User";
+            $redirect = '/user';
+        }
 
         $credentials = $request->only('email', 'password');
-        if (Auth::guard('admin')->attempt($credentials)) {
-            $admin = Admin::where('email',$request->input('email'))->firstOrFail();
-            Auth::guard('admin')->login($admin);
-            return redirect('/admin');
+        if (Auth::guard($guard)->attempt($credentials)) {
+            $actor = ($class)::where('email',$request->input('email'))->firstOrFail();
+            Auth::guard($guard)->login($actor);
+            return redirect($redirect);
         } else {
             return redirect()->back()->withInput($request->only('email'))
                 ->withErrors(['email' => 'Invalid login credentials.']);
