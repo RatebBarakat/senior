@@ -15,7 +15,7 @@ class checkCenterAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->guard('admin')->check() || !auth()->guard('admin')->user()->isAdminCenter()){
+        if (!auth()->guard('admin')->user()->isAdminCenter()){
             abort(404,'you are not set as admin to any center');
         }
 

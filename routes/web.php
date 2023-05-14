@@ -92,7 +92,7 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
         ->name('profile');
 
 
-   Route::middleware('superAdmin')->group(function (){
+   Route::middleware('can:super-admin')->group(function (){
 
         Route::prefix('location')->name('location.')->group(function (){
             Route::get('/',[LocationController::class,'index'])->name('index');
@@ -112,14 +112,14 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
        Route::view('/admins','admin.super.admins')->name('admins');
    });
 
-   Route::middleware('centerAdmin')->name('admincenter.')
+   Route::middleware(['can:center-admin','centerAdmin'])->name('admincenter.')
        ->prefix('center')->group(function (){
       Route::view('/','admin.center.index')->name('index');
       Route::view('/report','admin.center.reports')->name('reports');
       Route::post('/report/create',[ReportController::class,'generateReport'])->name('reports.store');
    });
 
-    Route::middleware(['employee'])->group(function () {
+    Route::middleware(['can:center-employee','employee'])->group(function () {
         Route::prefix('blood-request')->name('blood-request.')->group(function ()
         {
             Route::view('/', 'admin.blood-request.index')->name('index');

@@ -15,10 +15,6 @@ class checkEmployeeAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!auth()->guard('admin')->check() || !auth()->guard('admin')->user()->isEmployee()){
-            abort(404);
-        }
-
         if (is_null(auth()->guard('admin')->user()->center_id)) {
             abort(404,'you are not assign to any center so you cannot manage this action');
         }
