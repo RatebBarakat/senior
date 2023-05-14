@@ -12,6 +12,12 @@
                     <div class="card-body">
                         <form method="POST" action="{{ route('admin.login') }}">
                             @csrf
+                            @if($errors->has('login'))
+                            <div class="text-danger">
+                                {{ $errors->first('login') }}
+                            </div>
+                            @endif                        
+                        
                             <div class="form-group">
                                 <label for="email">{{ __('email') }}</label>
                                 <input id="email" type="email" class="form-control @error('email') is-invalid @enderror"
