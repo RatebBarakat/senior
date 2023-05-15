@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Admin\Super;
 
+use App\Helpers\NotifyEventCreated;
 use App\Models\DonationCenter;
 use App\Models\Event;
 use Carbon\Carbon;
@@ -16,7 +17,7 @@ class Events extends Component
     public string $startAt = "";
     public string $endAt = "";
     public int $event_id = 0;
-    public array $selectedcenters = [];
+    public $selectedcenters = [];
 
     public function mount()
     {
@@ -51,13 +52,14 @@ class Events extends Component
     public function toggleCenter(int $id)
     {
         $center = DonationCenter::findOrFail($id);
-        $isSelected = array_search($id,$this->selectedcenters);
+        $isSelected = in_array($id, $this->selectedcenters);
         $message = '';
         if ($isSelected) {
-            unset($this->selectedcenters[$isSelected]);
+            $key = array_search($id,$this->selectedcenters);
+            unset($this->selectedcenters[$key]);
             $message = "{$center->name} removed from added centers";
         }else {
-            array_push($this->selectedcenters,$id);
+            array_push($this->selectedcenters, $id);
             $message = "{$center->name} added to added centers";
         }
         
@@ -81,7 +83,8 @@ class Events extends Component
         ]);
 
         $this->attachCenters($event,$this->selectedcenters);
-
+        
+        (new NotifyEventCreated)->notifyUsers($event);//send notifications
         $this->alert('success','event created succeefully');
         $this->hideAddModal();
     }
@@ -121,7 +124,7 @@ class Events extends Component
     public function showAddModal()
     {
         $this->resetValidation();
-        // $this->resetInputs();
+        $this->resetInputs();
         $this->dispatchBrowserEvent('show-add-modal');
     }
 

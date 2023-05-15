@@ -124,12 +124,15 @@
 
                         <div class="form-group">
                             <label for="">included centers</label>
-                            <span class="text-danger">@error('selectedCenters'){{$message}}@enderror</span>
+                            {{-- @foreach ($selectedcenters as $c)
+                                {{$c }}
+                            @endforeach --}}
+                            <span class="text-danger">@error('selectedcenters'){{$message}}@enderror</span>
                             <div class="d-flex gap-2" style="gap: 10px">
                                 @forelse ($centers as $center)
                                     <button type="button" wire:loading.attr="disabled"
-                                    class="btn btn-sm btn-primary 
-                                    @if(in_array($center->id,$selectedcenters)) btn-success @endif" 
+                                    class="btn btn-sm
+                                    @if(in_array($center->id,$selectedcenters)) btn-success @else btn-primary  @endif" 
                                     wire:click="toggleCenter({{$center->id}})">
                                     @if (in_array($center->id,$selectedcenters))
                                     <svg style="margin-right: 3px" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#0f0" class="bi bi-check2-circle" viewBox="0 0 16 16">
@@ -208,7 +211,7 @@
 
                         <div class="form-group">
                             <label for="">included centers</label>
-                            <span class="text-danger">@error('selectedCenters'){{$message}}@enderror</span>
+                            <span class="text-danger">@error('selectedcenters'){{$message}}@enderror</span>
                             <div class="d-flex gap-2" style="gap: 10px">
                                 @forelse ($centers as $center)
                                     <button type="button" wire:loading.attr="disabled"

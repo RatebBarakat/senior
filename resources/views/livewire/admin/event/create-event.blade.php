@@ -1,6 +1,6 @@
 <div class="container-sm bg-white m-auto py-4 profile-show">
         <form action="" method="POST" wire:submit.prevent="requestEvent">
-            <span>
+            <span><div class="text-danger">@error('bloodType'){{$message}}@enderror</div>
                 <select name="" id="" class=" custom-select w-25" wire:model="bloodType">
                     <option value="">select blood type</option>
                     @foreach ($bloodTypes as $blood)
@@ -8,7 +8,10 @@
                     @endforeach
                 </select>
                 <div class="form-group">
-                    <input type="number" name="" class="form-control w-25 mt-3" placeholder="quantity" id="" min="0" max="50" wire:model="quantity">
+                    <label for="quantity">quantity needed</label>
+                    <span class="text-danger">@error('quantity'){{$message}}@enderror</span>
+                    <input type="number" name=""
+                    class="form-control w-25 mt-3" placeholder="quantity" id="quantity" min="0" max="50" wire:model="quantity">
                 </div>
             </span>
             @if ($bloodType != "" && $quantity != "")
