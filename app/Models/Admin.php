@@ -116,6 +116,16 @@ class Admin extends Authenticatable
         return $this->hasManyThrough(Appointment::class,DonationCenter::class,
         'center_id','center_id');
     }
+
+    public function messages()
+    {
+        return $this->morphMany(Message::class, 'recipient');
+    }
+
+    public function sentMessages()
+    {
+        return $this->morphMany(Message::class, 'sender');
+    }
     
     /**
      * The attributes that should be hidden for serialization.
