@@ -85,6 +85,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->deviceTokens()->pluck('token')->toArray();
     }
 
+    public function receivedMessages()
+    {
+        return $this->morphMany(Message::class, 'recipient');
+    }
+
+    public function sentMessages()
+    {
+        return $this->morphMany(Message::class, 'sender');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
