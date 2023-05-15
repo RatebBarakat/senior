@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\BloodRequestController;
 use App\Http\Controllers\Api\SocialLoginController;
 use App\Http\Controllers\Center\ReportController;
 use App\Mail\SendPdfEmail as MailSendPdfEmail;
+use App\Models\Admin;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -46,7 +47,12 @@ Route::get('/success',function (){
 })->name('success');
 
 Route::get('/seed',function (){
+    $Permission = Permission::create(['name' => 'request-event','slug' => 'request-event']);
+    $allowsRoles = array('hospital','center-admin');
 
+    foreach ($allowsRoles as $role) {
+        Role::where('name',$role)->first()->permissions()->attach($Permission);
+    }
 });
 
 Route::post('/admin/login',[\App\Http\Controllers\Controller::class,'login'])
@@ -67,9 +73,19 @@ Route::post('/admin/set-password/{id}/{token}',[AdminPasswordController::class,'
 
 Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function (){
 
+    Route::middleware('can:request-event')->name('event.')->prefix('event')->group(function ()
+    {
+        Route::view('/create', 'admin.event.create-event')->name('create');
+    });
+
     Route::prefix('notification')->name('notification.')->group(function ()
     {
         Route::put('/{id}/markAsRead',[NotificationController::class,'markAsRead'])->name('markRead');
+    });
+
+    Route::prefix('messages')->name('messages.')->group(function ()
+    {
+        Route::view('/', 'admin.messages')->name('index');
     });
 
     Route::post('/logout', function (Request $request) {
@@ -93,6 +109,12 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
 
 
    Route::middleware('can:super-admin')->group(function (){
+
+
+        Route::prefix('events')->name('events.')->group(function ()
+        {
+            Route::view('/','admin.super.events')->name('index');            
+        });
 
         Route::prefix('location')->name('location.')->group(function (){
             Route::get('/',[LocationController::class,'index'])->name('index');
@@ -162,3 +184,5 @@ Route::post('/email/verification-notification', function (Request $request) {
  
     return back()->with('message', 'Verification link sent!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+include __DIR__ . "/user.php";
