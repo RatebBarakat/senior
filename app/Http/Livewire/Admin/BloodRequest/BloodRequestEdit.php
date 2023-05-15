@@ -52,12 +52,12 @@ class BloodRequestEdit extends Component
         if (in_array($donation->id,$this->selectedBlood)) {
             $index = array_search($donation->id, $this->selectedBlood);
 
-            if ($index !== false) {
+            if ($index !== false) {//remove the donation
                 $needDecrement = $this->neededDecrement[0][$donation->id] ?? null;
                 $decrement = $needDecrement ?? $donation->quantity;
                 $this->totalSelected -= $decrement;
                 unset($this->selectedBlood[$index]);
-                foreach($this->neededDecrement as $key => $value) {
+                foreach($this->neededDecrement as $key => $value) {//check for needed devrement if exists remove it
                     if(array_key_exists($donation->id, $value)) {
                         unset($this->neededDecrement[$key]);
                         break;
@@ -65,8 +65,6 @@ class BloodRequestEdit extends Component
                 }
             }
             
-            
-    
             // release the lock on the selected donation
             DB::commit();
     
@@ -74,7 +72,7 @@ class BloodRequestEdit extends Component
         }
     
 
-        if ($this->bloodRequest->quantity_needed > $this->totalSelected) {
+        if ($this->bloodRequest->quantity_needed > $this->totalSelected) {//add the donation
             if ($total + $donation->quantity <= $this->bloodRequest->quantity_needed) {
                 $this->totalSelected += $donation->quantity;
             } else {
@@ -104,10 +102,10 @@ class BloodRequestEdit extends Component
         try {
             foreach ($this->selectedBlood as $value => $id) {
                 $donation = Donation::where('id', $id)->lockForUpdate()->firstOrFail();
-                if ($donation->taken == 0) {
+                if ($donation->taken == 0) {//checl if the doantion is used
                     if (isset($this->neededDecrement[0][$donation->id])) {
                         $quantity = $this->neededDecrement[0][$donation->id];
-                        if ($donation->quantity >= $quantity) {
+                        if ($donation->quantity >= $quantity) {//checl for quantity availability
                             $donation->quantity -= $quantity;
                             $donation->save();
                             foreach($this->neededDecrement as $key => $value) {
