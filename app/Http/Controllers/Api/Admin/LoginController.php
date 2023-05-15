@@ -61,21 +61,20 @@ class LoginController extends Controller
             return response()->json(['errors' => $validator->errors()],400);
         }
         $user = User::where('email',$request->input('email'))->first();
-        if (!$user){
+        if (!$user || !$user->role){
             return response()->json(['errors' => 'credentials not match record'],400);
         }
 
         if (Hash::check($request->input('password'),$user->password)){
-            
             if (! $user->hasVerifiedEmail()) {
                 return response()->json(['errors' => 'Your email is not verified.'], 400);
             }
             $token = $user->createToken($request->input('email').'Token',
-                ['user'],now()->addHours(2))
+                [$user->role->name],now()->addHours(2))
                 ->plainTextToken;
             return response()->json(['token' => $token,
                 'user' => UserResourse::make($user),
-                'role' => 'user'
+                'role' => $user->role->name
             ]);
         }
         return response()->json(['errors' => 'wrong password'],400);
