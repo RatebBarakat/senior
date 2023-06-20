@@ -15,11 +15,11 @@ class DonationCenter extends Model
         return $this->belongsTo(Location::class);
     }
 
-    public function CenterAdmin(){
-        return $this->hasOne(Admin::class)->withDefault();
-    }
+    // public function CenterAdmin(){
+    //     return $this->hasOne(Admin::class)->withDefault();
+    // }
 
-    public function admin()
+    public function admin()//return admin of center
     {
         return $this->hasOne(Admin::class, 'id', 'admin_id');
     }

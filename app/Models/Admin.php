@@ -91,12 +91,12 @@ class Admin extends Authenticatable
     }
 
 
-    public function center(){
+    public function center(){//for center admin
         return $this->hasOne(DonationCenter::class);
     }
 
     /**
-     * Get the user that owns the Admin
+     * Get the center that owns the Admin
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
