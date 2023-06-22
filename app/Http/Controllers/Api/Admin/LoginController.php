@@ -20,17 +20,18 @@ class LoginController extends Controller
         $this->middleware('guest:sanctum');
     }
 
-    public function Adminlogin(Request $request){
-        $validator = Validator::make($request->all(),[
+    public function Adminlogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
-        if ($validator->fails()){
-            return response()->json(['errors' => $validator->errors()],400);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
         }
-        $admin = Admin::where('email',$request->input('email'))->first();
-        if (!$admin){
-            return response()->json(['errors' => 'credentials not match record'],400);
+        $admin = Admin::where('email', $request->input('email'))->first();
+        if (!$admin) {
+            return response()->json(['errors' => 'credentials not match record'], 400);
         }
         if ($admin) {
             $role = $admin->role;
@@ -43,41 +44,48 @@ class LoginController extends Controller
         } else {
             $permissions = [];
         }
-        if (Hash::check($request->input('password'),$admin->password)){
-            $token = $admin->createToken($request->input('email').'Token',
-                $permissions,now()->addHours(2))->plainTextToken;
-            return response()->json(['token' => $token,'admin' => AdminResourse::make($admin),
-                'permissions' => $permissions]);
+        if (Hash::check($request->input('password'), $admin->password)) {
+            $token = $admin->createToken(
+                $request->input('email') . 'Token',
+                $permissions,
+                now()->addHours(2)
+            )->plainTextToken;
+            return response()->json([
+                'token' => $token, 'admin' => AdminResourse::make($admin),
+                'permissions' => $permissions
+            ]);
         }
-        return response()->json(['errors' => 'wrong password'],400);
+        return response()->json(['errors' => 'wrong password'], 400);
     }
 
-    public function Userlogin(Request $request){
-        $validator = Validator::make($request->all(),[
+    public function Userlogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string',
         ]);
-        if ($validator->fails()){
-            return response()->json(['errors' => $validator->errors()],400);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
         }
-        $user = User::where('email',$request->input('email'))->first();
-        if (!$user || !$user->role){
-            return response()->json(['errors' => 'credentials not match record'],400);
+        $user = User::where('email', $request->input('email'))->first();
+
+        if (!$user || !Hash::check($request->input('password'), $user->password)) {
+            return response()->json(['errors' => ['general' => ['credentials not match record']]], 400);
         }
 
-        if (Hash::check($request->input('password'),$user->password)){
-            if (! $user->hasVerifiedEmail()) {
-                return response()->json(['errors' => 'Your email is not verified.'], 400);
-            }
-            $token = $user->createToken($request->input('email').'Token',
-                [$user->role->name],now()->addHours(2))
-                ->plainTextToken;
-            return response()->json(['token' => $token,
-                'user' => UserResourse::make($user),
-                'role' => $user->role->name
-            ]);
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json(['errors' => ['email' => ['Your email is not verified.']]], 400);
         }
-        return response()->json(['errors' => 'wrong password'],400);
+
+        $token = $user->createToken(
+            $request->input('email') . 'Token',
+            ['*'],
+            now()->addHours(2)
+        )->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => UserResourse::make($user),
+        ]);
     }
-
 }
