@@ -80,10 +80,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Appointment::class);
     }
 
-    public function routeNotificationForFcm($driver, $notification = null)
-    {
-        return $this->deviceTokens()->pluck('token')->toArray();
-    }
+    // public function routeNotificationForFcm($driver, $notification = null)
+    // {
+    //     return $this->deviceTokens()->pluck('token')->toArray();
+    // }
 
     public function receivedMessages()
     {

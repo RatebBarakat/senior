@@ -110,19 +110,12 @@ class Admin extends Authenticatable
         return $this->hasMany(BloodRequest::class, 'center_id', 'center_id');
     }
 
-
-    public function appointments()
-    {
-        return $this->hasManyThrough(Appointment::class,DonationCenter::class,
-        'center_id','center_id');
-    }
-
-    public function messages()
+    public function messages()//one to many
     {
         return $this->morphMany(Message::class, 'recipient');
     }
 
-    public function sentMessages()
+    public function sentMessages()//one to many
     {
         return $this->morphMany(Message::class, 'sender');
     }

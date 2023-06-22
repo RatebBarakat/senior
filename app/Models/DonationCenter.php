@@ -25,9 +25,9 @@ class DonationCenter extends Model
     }
     public function bloodRequests()
     {
-        return $this->hasManyThrough(BloodRequest::class, DonationCenter::class, 
-        'admin_id', 'center_id', 'id');
+        return $this->hasMany(BloodRequest::class, 'center_id');
     }
+    
 
     public function appointments()
     {
