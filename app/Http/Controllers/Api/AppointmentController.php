@@ -30,16 +30,13 @@ class AppointmentController extends Controller
         $filename = storage_path('app/public/pdf/' . $appointment->pdf_file);
     
         if (file_exists($filename)) {
-            // file exists, so you can download it
             $fileContents = file_get_contents($filename);
     
-            // return file contents or response
             return response()->make($fileContents, 200, [
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'inline; filename="' . $appointment->pdf_file . '"'
             ]);
         } else {
-            // file does not exist
             return response()->json(['message' => 'File not found'], 404);
         }    
     }
@@ -50,9 +47,10 @@ class AppointmentController extends Controller
 //        DB::enableQueryLog();
 
         $user = \request()->user();
+
         $user->load('appointments','appointments.center','appointments.center.location');
         return $this->successResponse([
-            'appointments' => AppointmentResource::collection($user->appointments),
+            'appointments' => $user->appointments,
 //            'query' => DB::getQueryLog()
         ]);
     }
@@ -65,7 +63,7 @@ class AppointmentController extends Controller
         $user = \request()->user();
 
         if ((string) $errorMessage = $this->canScheduleAppointment($user)) {
-            return $this->responseError($errorMessage);
+            return $this->validationErrors(['general' => [$errorMessage]]);
         }
 
         $validator = Validator::make($request->all(), [
@@ -107,7 +105,8 @@ class AppointmentController extends Controller
         $newAppointment = $this->createNewAppointment($user, $center, $date, $nextAvailableTime,$request->input('blood_type'));
 
         return $this->successResponse(['appointment' => $newAppointment],
-            "Appointment added on " . $date->format('l, F jS, Y') . " at " . $nextAvailableTime->format('g:i A'));
+            "Appointment added on " . $date->format('l, F jS, Y') . " at " .
+             $nextAvailableTime->format('g:i A'));
     }
 
     private function createNewAppointment($user, DonationCenter $center, Carbon $date, Carbon $time,$blood_type)
@@ -173,7 +172,7 @@ class AppointmentController extends Controller
      */
     public function show(string $id)
     {
-        return Appointment::findOrFail($id);
+        return AppointmentResource::make(Appointment::findOrFail($id));
     }
 
     /**
@@ -194,6 +193,8 @@ class AppointmentController extends Controller
 
         $validator = Validator::make($request->all(), [
             'center_id' => 'required|integer|exists:donation_centers,id',
+            'blood_type' => ['required',
+            Rule::in('A+','B+','O+','AB+','A-','B-','O-','AB-')],
             'date' => [
                 'required',
                 'date_format:Y-m-d',
@@ -226,6 +227,7 @@ class AppointmentController extends Controller
 
         $updatedAppointment = $appointment->update([
             'center_id' => $request->input('center_id'),
+            'blood_type' => $request->input('blood_type'),
             'date' => $request->input('date'),
             'time' => $nextAvailableTime
         ]);
@@ -241,7 +243,7 @@ class AppointmentController extends Controller
     {
         $appointment = Appointment::scheduled()->find($id);
         if (!$appointment){
-            return $this->responseError('appointment not found');
+            return $this->responseError('appointment is completed and cannot deleted');
         }
         $appointment->delete();
         return $this->successResponse([],'appointment deleted successfully');

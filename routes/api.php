@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\LoginController;
 use App\Http\Controllers\Api\BloodRequestController;
 use App\Http\Controllers\Api\RegisterController;
+use App\Http\Resources\CenterResource;
+use App\Models\DonationCenter;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +22,9 @@ use App\Http\Controllers\Api\RegisterController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+Route::get('/centers',function () {
+    return CenterResource::collection(DonationCenter::get());
+});
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

@@ -17,9 +17,7 @@ class CenterResource extends JsonResource
     {
         $data = [];
 
-        if (!in_array($request->route()->getActionMethod(), ['index', 'show'])) {
-            $data['id'] = $this->id;
-        }
+        $data['id'] = $this->id;
 
         $data['name'] = $this->name;
 
