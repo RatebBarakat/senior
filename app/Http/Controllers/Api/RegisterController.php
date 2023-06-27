@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Traits\ResponseApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class RegisterController extends Controller
 {
+    use ResponseApi;
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(),
@@ -22,8 +24,7 @@ class RegisterController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $errors = $validator->errors();
-            return response()->json($errors,400);
+            return $this->validationErrors($validator->errors());
         }
 
         try {
@@ -33,11 +34,9 @@ class RegisterController extends Controller
             'password' => Hash::make($request->input('password')),
         ]);
     
-        // Send verification email
         $user->sendEmailVerificationNotification();
     
-        // Redirect to home or show a success message
-        return response()->json('Please check your email to verify your account.');
+        return $this->successResponse([],'Please check your email to verify your account.');
         } catch (\Exception $ex) {
             return response()->json($ex->getMessage());
 
