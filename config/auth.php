@@ -42,9 +42,9 @@ return [
         ],
 
         'api' => [
-            'driver' => 'token',
+            'driver' => 'sanctum',
             'provider' => 'users',
-            'hash' => true,
+            'hash' => false,
         ],
         'admin' => [
             'driver' => 'session',
@@ -55,12 +55,12 @@ return [
             'provider' => 'socials',
         ],
         'adminِ-api' => [
-            'driver' => 'token',
+            'driver' => 'sanctum',
             'provider' => 'admins',
             'hash' => true,
         ],
         'social-api' => [
-            'driver' => 'session',
+            'driver' => 'sanctum',
             'provider' => 'socials',
 //            'hash' => true,
         ],

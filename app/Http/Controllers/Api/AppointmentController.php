@@ -23,6 +23,16 @@ class AppointmentController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function index()
+    {
+//        DB::enableQueryLog();
+
+        $user = \request()->user();
+
+        $user->load('appointments','appointments.center','appointments.center.location');
+        return AppointmentResource::collection($user->appointments);
+//            'query' => DB::getQueryLog()
+    }
 
     public function downloadPdf(int $id)
     {
@@ -40,20 +50,7 @@ class AppointmentController extends Controller
             return response()->json(['message' => 'File not found'], 404);
         }    
     }
-    
 
-    public function index()
-    {
-//        DB::enableQueryLog();
-
-        $user = \request()->user();
-
-        $user->load('appointments','appointments.center','appointments.center.location');
-        return $this->successResponse([
-            'appointments' => $user->appointments,
-//            'query' => DB::getQueryLog()
-        ]);
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -181,14 +178,17 @@ class AppointmentController extends Controller
     public function update(Request $request, int $id)
     {
         $user = \request()->user();
-        $appointment = Appointment::scheduled()
-            ->where(function ($q) use ($user,$id) {
+        $appointment = Appointment::where(function ($q) use ($user,$id) {
                 $q->where('user_id',$user->id)
                     ->where('id',$id);
             })->first();
 
         if (!$appointment){
             return $this->responseError('the appointment doesnt exists');
+        }
+
+        if($appointment->status == "complete"){
+            return $this->responseError('the appointment is  complete and caanot editted');
         }
 
         $validator = Validator::make($request->all(), [

@@ -53,7 +53,6 @@ class Index extends Component
         $admin->load(['bloodRequests' => function ($query) {
             $query->where('status', 'pending');
         }]);
-
         $id = request()->query('filter');
         $bloodRequestsQuery = $admin->bloodRequests()->where('status','pending');
         if ($id) {//asign id filtered

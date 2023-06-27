@@ -55,9 +55,9 @@ Route::middleware('auth:sanctum','verified')->prefix('user')->name('user.')->gro
         Route::apiResource('/appointment',AppointmentController::class);
     });
 
-    Route::name('request.')->prefix('request')->group(function ()
+    Route::name('request.')->group(function ()
     {
-       Route::post('/',[BloodRequestController::class,'store'])->name('store');
+        Route::apiResource('/request',BloodRequestController::class);
     });
 });
 

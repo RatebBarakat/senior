@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\BloodRequestResourse;
 use App\Jobs\NotifyAdminsBloodRequest;
 use App\Models\BloodRequest;
 use App\Models\Donation;
@@ -18,22 +19,22 @@ class BloodRequestController extends Controller
 
     public function index()
     {
-        return request()->user()->load('requests');
+        request()->user()->load('requests');
+        return BloodRequestResourse::collection(request()->user()->requests);
     }
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'patient_name' => 'required|string',
             'hospital_name' => 'required|string',
             'hospital_location' => 'required|string',
             'contact_name' => 'nullable|string',
             'contact_phone_number' => 'required|integer',
-            'blood_type_needed' => ['required',Rule::in(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])],
+            'blood_type_needed' => ['required', Rule::in(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])],
             'quantity_needed' => 'required',
-            'urgency_level' => ['nullable',Rule::in(['immediate','24 hours'])],
+            'urgency_level' => ['nullable', Rule::in(['immediate', '24 hours'])],
             'center_id' => 'required|integer|exists:donation_centers,id',
-            'user_id' => 'required|integer|exists:users,id',
         ]);
 
         if ($validator->fails()) {
@@ -42,34 +43,98 @@ class BloodRequestController extends Controller
 
         $center = DonationCenter::findOrFail($request->input('center_id'));
 
-        if ($this->checkCompatibility($center,$request->input('blood_type_needed'),$request->input('quantity_needed'))) {
-            $bloodRequest = BloodRequest::create($validator->validated());
+        if ($this->checkCompatibility($center, $request->input('blood_type_needed'), $request->input('quantity_needed'))) {
+            $bloodRequest = BloodRequest::create(array_merge($validator->validated(), ['user_id' => $request->user()->id]));
             dispatch(new NotifyAdminsBloodRequest($bloodRequest));
-            return $this->successResponse(['bloodRequest' => $bloodRequest],'request addedd successfully');
+            return $this->successResponse(['bloodRequest' => $bloodRequest], 'request addedd successfully');
         }
-        
-        $center = $this->getAvailableCenter($request->input('blood_type_needed'),$request->input('quantity_needed'));
+
+        $center = $this->getAvailableCenter($request->input('blood_type_needed'), $request->input('quantity_needed'));
 
         if (is_null($center)) {
+            return $this->responseError("there no center have {$request->input('blood_type_needed')} type with
+            {$request->input('quantity_needed')} quantity",412);
+        } else {
             return response()->json([
-                'error' => "there no center have {$request->input('blood_type_needed')} of type {$request->input('quantity_needed')}"
-            ]);
+                'message' => 'selected center dont have enough quanatity of this blood type this is an availalbe one',
+                'availabe_center' => $center
+            ], 412);
+        }
+    }
+    public function show(int $id)
+    {
+        $blood = BloodRequest::findOrFail($id);
+        return BloodRequestResourse::make($blood);
+    }
+
+    public function update(Request $request, int $id)
+    {
+        $bloodRequest = BloodRequest::find($id);
+
+        if(!$bloodRequest){
+            return $this->responseError('the request was not found');
+        }
+
+        if($bloodRequest->status != "pending"){
+            return $this->responseError("you cannot update this request with status {$bloodRequest->status}");
+        }
+
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'patient_name' => 'required|string',
+            'hospital_name' => 'required|string',
+            'hospital_location' => 'required|string',
+            'contact_name' => 'nullable|string',
+            'contact_phone_number' => 'required|integer',
+            'blood_type_needed' => ['required', Rule::in(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])],
+            'quantity_needed' => 'required',
+            'urgency_level' => ['nullable', Rule::in(['immediate', '24 hours'])],
+            'center_id' => 'required|integer|exists:donation_centers,id',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrors($validator->errors());
+        }
+
+        $center = DonationCenter::findOrFail($request->input('center_id'));
+
+        if ($this->checkCompatibility($center, $request->input('blood_type_needed'), $request->input('quantity_needed'))) {
+            $bloodRequest->update(
+                array_merge($validator->validated(), ['user_id' => $user->id])
+            );
+            // dispatch(new NotifyAdminsBloodRequest($bloodRequest));
+            return $this->successResponse(['bloodRequest' => $bloodRequest], 'request updated successfully');
+        }
+
+        $center = $this->getAvailableCenter($request->input('blood_type_needed'), $request->input('quantity_needed'));
+
+        if (is_null($center)) {
+            return $this->responseError("there no center have {$request->input('blood_type_needed')} of type {$request->input('quantity_needed')}");
         } else {
             return response()->json([
                 'message' => 'selected center dont have enough quanatity of this blood type',
-                'availabe-center' => $center
-            ]);
+                'availabe_center' => $center
+            ], 401);
         }
-        
     }
 
-    private function checkCompatibility(DonationCenter $center,$bloodTypeNeeded,$quantityNeeded)
+    public function destroy(int $id) {
+        $bloodRequest = request()->user()->requests()->findOrFail($id);
+        if($bloodRequest->status == "pending"){
+             $bloodRequest->delete();
+            return $this->successResponse([],'blood request deleted successfully');
+        }else{
+            return $this->responseError("you cannot delete this request with status {$bloodRequest->status}");
+        }
+    }
+    private function checkCompatibility(DonationCenter $center, $bloodTypeNeeded, $quantityNeeded)
     {
         $availableQuantity = Donation::where([
-            ['blood_type','=',$bloodTypeNeeded],
-            ['center_id','=',$center->id],
+            ['blood_type', '=', $bloodTypeNeeded],
+            ['center_id', '=', $center->id],
         ])->sum('quantity');
-        
+
         if ($quantityNeeded > $availableQuantity) {
             return false;
         }
@@ -77,20 +142,14 @@ class BloodRequestController extends Controller
         return true;
     }
 
-    private function getAvailableCenter($bloodTypeNeeded,$quantityNeeded)
+    private function getAvailableCenter($bloodTypeNeeded, $quantityNeeded)
     {
-        $center = DonationCenter::whereHas('donations', function ($query) use ($bloodTypeNeeded,$quantityNeeded) {
+        $center = DonationCenter::whereHas('donations', function ($query) use ($bloodTypeNeeded, $quantityNeeded) {
             $query->where([
                 ['blood_type', $bloodTypeNeeded],
             ])->havingRaw('SUM(quantity) > ?', [$quantityNeeded]);
         })->first();
 
         return $center ?? null;
-    }
-
-    public function show(int $id)
-    {
-        $blood = BloodRequest::findOrFail($id);
-        return $blood->patient_name;
     }
 }

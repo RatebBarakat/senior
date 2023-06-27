@@ -29,10 +29,7 @@ class ProfileController extends Controller
             return $this->responseError('profile not found');
         }
 
-
-        return $this->successResponse(['profile' => ProfileResourse::make($user->profile)]
-            , 'user profile');
-
+        return  ProfileResourse::make($user->profile);
     }
 
     public function update(Request $request)
