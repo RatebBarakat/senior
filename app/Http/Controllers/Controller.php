@@ -20,7 +20,7 @@ class Controller extends BaseController
     {
         $key = 'login_attempts_'.$request->ip();
         $maxAttempts = 5;
-        $decaySeconds = 180;//3 minutes
+        $decaySeconds = 180;//3 min
 
         if (RateLimiter::tooManyAttempts($key, $maxAttempts, $decaySeconds)) {
             $seconds = RateLimiter::availableIn($key);

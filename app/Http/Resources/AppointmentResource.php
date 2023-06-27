@@ -22,6 +22,7 @@ class AppointmentResource extends JsonResource
         $data['date'] = $this->date;
         $data['blood_type'] = $this->blood_type;
         $data['time'] = $this->time;
+        $data['quantity'] = $this->quantity;
         $data['center'] = CenterResource::make($this->center);
         $data['location'] = LocationResource::make($this->center->location);
 

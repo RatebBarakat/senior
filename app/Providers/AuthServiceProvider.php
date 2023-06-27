@@ -27,19 +27,19 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $permissions = \App\Models\Permission::get();
-        $roles = \App\Models\Role::get();
+        // $permissions = Permission::get();
+        // $roles = Role::get();
     
-        foreach ($permissions as $permission) {
-            Gate::define($permission->name, function ($user) use ($permission) {
-                return $user->hasPermission($permission->name);
-            });            
-        }
+        // foreach ($permissions as $permission) {
+        //     Gate::define($permission->name, function ($user) use ($permission) {
+        //         return $user->hasPermission($permission->name);
+        //     });            
+        // }
 
-        foreach ($roles as $role) {
-            Gate::define($role->name, function ($user) use ($role) {
-                return $user->hasRole($role->name);
-            });            
-        }
+        // foreach ($roles as $role) {
+        //     Gate::define($role->name, function ($user) use ($role) {
+        //         return $user->hasRole($role->name);
+        //     });            
+        // }
     }
 }

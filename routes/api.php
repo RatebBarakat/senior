@@ -63,5 +63,5 @@ Route::middleware('auth:sanctum','verified')->prefix('user')->name('user.')->gro
 
 Route::middleware('guest:sanctum')->group(function ()
 {
-    Route::post('/register',[RegisterController::class,'register']);
+    Route::post('/user/register',[RegisterController::class,'register']);
 });

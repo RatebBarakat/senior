@@ -172,7 +172,8 @@ Route::get('/email/verify/{id}/{expiry}/{token}', function ($id, $expiry, $token
     $user->email_verified_at = now();
     $user->save();
 
-    return 'Your email has been verified.';
+    return redirect()->to('http://localhost:8080/verify-email');
+    
 })->name('verification.verify')->middleware(['signed']);
 
 
