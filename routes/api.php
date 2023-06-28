@@ -44,9 +44,10 @@ Route::middleware(['auth:sanctum','api.admin'])->group(function (){
     Route::apiResource('/users',UserController::class);
 });
 
-Route::middleware('auth:sanctum','verified')->prefix('user')->name('user.')->group(function (){
+Route::middleware(['auth:sanctum','verified'])->prefix('user')->name('user.')->group(function (){
+
     Route::prefix('profile')->name('profile.')->group(function () {
-        Route::post('/update',[ProfileController::class,'update'])->name('update');
+        Route::post('/',[ProfileController::class,'update'])->name('update');
         Route::apiResource('',ProfileController::class)->only('index');
     });
 

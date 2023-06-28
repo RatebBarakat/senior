@@ -22,14 +22,12 @@ class ProfileController extends Controller
     public function index()
     {
         $user = request()->user();
-        if (!$user) {
-            $this->responseError('user not found');
-        }
-        if (!$user->profile) {
-            return $this->responseError('profile not found');
-        }
 
-        return  ProfileResourse::make($user->profile);
+        // if (!$user->profile) {
+        //     return $this->responseError('profile not found');
+        // }
+
+        return ProfileResourse::make($user->profile);
     }
 
     public function update(Request $request)
@@ -38,7 +36,7 @@ class ProfileController extends Controller
             'location' => 'required|string|max:100',
             'bio' => 'required|string|max:1000',
             'blood_type' => ['required',
-                Rule::in('A','B','O','AB')],
+                Rule::in('A+','B+','O+','AB+','A-','B-','O-','AB-')],
             'avatar' => 'nullable|image|max:1024'
         ]);
 
@@ -60,7 +58,7 @@ class ProfileController extends Controller
 
             if ($user->profile->avatar) {
                 try {
-                    Storage::disk('public')->delete('avatars/' . $user->profile->avatar);
+                    unlink(public_path('storage/avatars/'.$user->profile->avatar));
                 } catch (Exception $exception) {
                     // Handle the exception here
                 }
@@ -81,13 +79,11 @@ class ProfileController extends Controller
 
         $user->profile->save();
 
-        // Reload the user object to reflect the updated profile data
         $user->load('profile');
 
         return $this->successResponse([
             'profile' => ProfileResourse::make($user->profile),
-            'message' => 'Profiles updated successfully'
-        ]);
+        ],'Profile updated successfully');
     }
 
 

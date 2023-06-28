@@ -18,7 +18,7 @@ class ProfileResourse extends JsonResource
             'bio' => $this->bio,
             'location' => $this->location,
             'blood_type' => $this->blood_type,
-            'avatar' => $this->avatar,
-        ];
+            'avatar' => $this->avatar ? asset('storage/avatars/'.$this->avatar) : null,
+        ];        
     }
 }
