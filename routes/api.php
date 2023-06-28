@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\LoginController;
 use App\Http\Controllers\Api\BloodRequestController;
+use App\Http\Controllers\api\NotificationController;
 use App\Http\Controllers\Api\RegisterController;
 use App\Http\Resources\CenterResource;
 use App\Models\DonationCenter;
@@ -23,7 +24,12 @@ use App\Models\DonationCenter;
 |
 */
 Route::get('/centers',function () {
-    return CenterResource::collection(DonationCenter::get());
+    if(cache()->has('centers')){
+        return CenterResource::collection(cache()->get('centers'));
+    }
+    $centers = DonationCenter::get();
+    cache()->set('centers',$centers);
+    return CenterResource::collection($centers);
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -50,6 +56,8 @@ Route::middleware(['auth:sanctum','verified'])->prefix('user')->name('user.')->g
         Route::post('/',[ProfileController::class,'update'])->name('update');
         Route::apiResource('',ProfileController::class)->only('index');
     });
+
+    Route::get('/notification',[NotificationController::class,'index']);
 
     Route::name('appointment.')->group(function () {
         Route::post('/appointment/download/{id}',[AppointmentController::class,'downloadPdf'])->name('download');
