@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Middleware\EnsureEmailIsVerified;
 
@@ -60,6 +61,17 @@ class LoginController extends Controller
 
     public function Userlogin(Request $request)
     {
+        $key = 'login_attempts_api_' . $request->ip();
+        $maxAttempts = 5;
+        $decaySeconds = 180; //3 min
+
+        if (RateLimiter::tooManyAttempts($key, $maxAttempts, $decaySeconds)) {
+            $seconds = RateLimiter::availableIn($key);
+            return response()->json(['errors' => [
+                'general' => ['Too many attempts. Please try again in ' . $seconds . ' seconds.']
+            ]], 400);
+        }
+
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string',
@@ -70,10 +82,12 @@ class LoginController extends Controller
         $user = User::where('email', $request->input('email'))->first();
 
         if (!$user || !Hash::check($request->input('password'), $user->password)) {
+            RateLimiter::hit($key, $decaySeconds);
             return response()->json(['errors' => ['general' => ['credentials not match record']]], 400);
         }
 
         if (!$user->hasVerifiedEmail()) {
+            RateLimiter::hit($key, $decaySeconds);
             return response()->json(['errors' => ['email' => ['Your email is not verified.']]], 400);
         }
 
