@@ -233,7 +233,7 @@ class AppointmentController extends Controller
         ]);
 
         return $this->successResponse(['appointment' => $appointment],
-            "Appointment added on " . $date->format('l, F jS, Y') . " at " . $nextAvailableTime->format('g:i A'));
+            "Appointment update successfully");
     }
 
     /**
