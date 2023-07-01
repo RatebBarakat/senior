@@ -33,7 +33,7 @@ class BloodRequestCompleted extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail','database'];
     }
 
     /**
@@ -44,8 +44,9 @@ class BloodRequestCompleted extends Notification implements ShouldQueue
         try {
             return (new MailMessage)
                     ->line('blood request comleted.')
-                    ->action('Notification Action', url('/'))
-                    ->line("your request was resolve by {$this->admin->name} at {$this->bloodRequest->center->name}");
+                    ->action('Notification Action', "/blood-request/{$this->bloodRequest->id}")
+                    ->line("your request was resolve by {$this->admin->name} at 
+                    {$this->bloodRequest->center->name} center");
    
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
@@ -60,7 +61,9 @@ class BloodRequestCompleted extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'message' => "your request was resolve by {$this->admin->name} 
+                         at {$this->bloodRequest->center->name}",
+            'url' => "/blood-request/{$this->bloodRequest->id}",
         ];
     }
 }

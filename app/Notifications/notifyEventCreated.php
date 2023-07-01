@@ -37,11 +37,13 @@ class notifyEventCreated extends Notification  implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $centers = implode(',',$this->event->centers()->get()->pluck('name')->toArray());
+        $centers = implode(',', $this->event->centers()->get()->pluck('name')->toArray());
+        $message = trim(preg_replace('/\s+/', ' ', "new event was created at {$centers} from
+                                    {$this->event->start_date} to {$this->event->end_date}"));
         return (new MailMessage)
-                    ->line("new event was created at {$centers} from {$this->event->start_date} to {$this->event->end_date}")
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->line($message)
+            ->action('click here to see more details', "/event/{$this->event->id}")
+            ->line('Thank you for using our application!');
     }
     /**
      * Get the array representation of the notification.
@@ -50,9 +52,11 @@ class notifyEventCreated extends Notification  implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
-        $centers = implode(',',$this->event->centers()->get()->pluck('name')->toArray());
+        $centers = implode(',', $this->event->centers()->get()->pluck('name')->toArray());
         return [
-            'message' => "new event was created at {$centers} from {$this->event->start_date} to {$this->event->end_date}",
+            'message' => "new event was created at {$centers} from {$this->event->start_date}
+                     to {$this->event->end_date}",
+            'url' => "/event/{$this->event->id}",
         ];
     }
 }
