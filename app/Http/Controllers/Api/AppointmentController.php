@@ -25,37 +25,37 @@ class AppointmentController extends Controller
      */
     public function index()
     {
-//        DB::enableQueryLog();
+        //        DB::enableQueryLog();
 
         $user = \request()->user();
 
-        $user->load('appointments','appointments.center','appointments.center.location');
+        $user->load('appointments', 'appointments.center', 'appointments.center.location');
         return AppointmentResource::collection($user->appointments);
-//            'query' => DB::getQueryLog()
+        //            'query' => DB::getQueryLog()
     }
 
     public function downloadPdf(int $id)
     {
         $appointment = Appointment::findOrFail($id);
         $filename = storage_path('app/public/pdf/' . $appointment->pdf_file);
-    
+
         if (file_exists($filename)) {
             $fileContents = file_get_contents($filename);
-    
+
             return response()->make($fileContents, 200, [
                 'Content-Type' => 'application/pdf',
                 'Content-Disposition' => 'inline; filename="' . $appointment->pdf_file . '"'
             ]);
         } else {
             return response()->json(['message' => 'File not found'], 404);
-        }    
+        }
     }
 
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
         $user = \request()->user();
 
@@ -65,18 +65,18 @@ class AppointmentController extends Controller
 
         $validator = Validator::make($request->all(), [
             'center_id' => 'required|integer|exists:donation_centers,id',
-            'blood_type' => ['required',
-                Rule::in('A+','B+','O+','AB+','A-','B-','O-','AB-')],
+            'blood_type' => ['required'],
             'date' => [
                 'required',
-                'date_format:Y-m-d',
+                // 'date_format:Y-m-d',
                 function ($attribute, $value, $fail) {
                     if (Carbon::parse($value)->isBefore(Carbon::tomorrow())) {
                         $fail('The appointment date must be at least tomorrow.');
                     }
                 },
             ],
-        ],[
+            'time' => 'required|date_format:H:i',
+        ], [
             'center_id.exists' => 'The donation center does not exist.',
         ]);
 
@@ -84,29 +84,42 @@ class AppointmentController extends Controller
             return $this->validationErrors($validator->errors());
         }
 
-        $date = Carbon::parse($request->input('date'));
         $center = DonationCenter::findOrFail($request->input('center_id'));
+
+        $availableTimes = $this->getTimes($center, $request->input('date'));
+
+        if (!in_array($request->input('time'), $availableTimes)) {
+            return $this->validationErrors(['general' => ['choosed time is not availalbe']]);
+        }
+
+        $date = Carbon::parse($request->input('date'));
         $appointment = Appointment::where('center_id', $center->id)
-            ->whereDate('date',$date)->latest('time')->first();
+            ->whereDate('date', $date)->latest('time')->first();
+        //        if ($appointment && Carbon::parse($appointment->time)->addMinutes(20)
+        //                ->greaterThanOrEqualTo(Carbon::createFromTime(16, 0, 0))) {
+        //            return $this->validationErrors(['error' => 'No available appointments after 4 PM']);
+        //        }
+        // $nextAvailableTime = $this->getNextAvailableTime($appointment);
 
-//        if ($appointment && Carbon::parse($appointment->time)->addMinutes(20)
-//                ->greaterThanOrEqualTo(Carbon::createFromTime(16, 0, 0))) {
-//            return $this->validationErrors(['error' => 'No available appointments after 4 PM']);
-//        }
+        // if ($nextAvailableTime == null)
+        //     return $this->responseError('you cannot take an appointment at this day');
 
-        $nextAvailableTime = $this->getNextAvailableTime($appointment);
+        $time = Carbon::parse($request->input('time'));
+        $newAppointment = $this->createNewAppointment(
+            $user,
+            $center,
+            $date,
+            $time,
+            $request->input('blood_type')
+        );
 
-        if ($nextAvailableTime == null)
-            return $this->responseError('you cannot take an appointment at this day');
-
-        $newAppointment = $this->createNewAppointment($user, $center, $date, $nextAvailableTime,$request->input('blood_type'));
-
-        return $this->successResponse(['appointment' => $newAppointment],
+        return $this->successResponse(
+            ['appointment' => $newAppointment],
             "Appointment added on " . $date->format('l, F jS, Y') . " at " .
-             $nextAvailableTime->format('g:i A'));
+                $time->format('g:i A')
+        );
     }
-
-    private function createNewAppointment($user, DonationCenter $center, Carbon $date, Carbon $time,$blood_type)
+    private function createNewAppointment($user, DonationCenter $center, Carbon $date, Carbon $time, $blood_type)
     {
         return Appointment::create([
             'user_id' => $user->id,
@@ -117,23 +130,21 @@ class AppointmentController extends Controller
             'blood_type' => $blood_type
         ]);
     }
+    // private function getNextAvailableTime(?Appointment $appointment)
+    // {
+    //     if (!$appointment) {
+    //         return Carbon::createFromTime(8, 0, 0); //at 8 PM
+    //     }
 
-    private function getNextAvailableTime(?Appointment $appointment)
-    {
-        if (!$appointment) {
-            return Carbon::createFromTime(8, 0, 0); //at 8 PM
-        }
+    //     $appointmentTime = Carbon::parse($appointment->time);
+    //     $nextAvailableTime = $appointmentTime->addMinutes(20);
 
-        $appointmentTime = Carbon::parse($appointment->time);
-        $nextAvailableTime = $appointmentTime->addMinutes(20);
+    //     if ($nextAvailableTime->greaterThanOrEqualTo(Carbon::createFromTime(16, 0, 0))) {
+    //         return null;
+    //     }
 
-        if ($nextAvailableTime->greaterThanOrEqualTo(Carbon::createFromTime(16, 0, 0))) {
-            return null;
-        }
-
-        return $nextAvailableTime;
-    }
-
+    //     return $nextAvailableTime;
+    // }
     private function canScheduleAppointment(Social|User $user): ?string
     {
         $now = Carbon::now();
@@ -142,7 +153,8 @@ class AppointmentController extends Controller
         if ($user->appointments()
             ->scheduled()
             ->whereBetween('date', [$now, $twoMonthsFromNow])
-            ->exists()) {
+            ->exists()
+        ) {
             return 'Sorry, you cannot make another appointment at this time. You already have an appointment scheduled within the next two months. This is because blood donation is generally recommended once every two months to ensure your body has enough time to recover fully.';
         }
 
@@ -161,9 +173,6 @@ class AppointmentController extends Controller
 
         return null;
     }
-
-
-
     /**
      * Display the specified resource.
      */
@@ -171,40 +180,39 @@ class AppointmentController extends Controller
     {
         return AppointmentResource::make(Appointment::findOrFail($id));
     }
-
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, int $id)
     {
         $user = \request()->user();
-        $appointment = Appointment::where(function ($q) use ($user,$id) {
-                $q->where('user_id',$user->id)
-                    ->where('id',$id);
-            })->first();
+        $appointment = Appointment::where(function ($q) use ($user, $id) {
+            $q->where('user_id', $user->id)
+                ->where('id', $id);
+        })->first();
 
-        if (!$appointment){
+        if (!$appointment) {
             return $this->responseError('the appointment doesnt exists');
         }
 
-        if($appointment->status == "complete"){
+        if ($appointment->status == "complete") {
             return $this->responseError('the appointment is  complete and caanot editted');
         }
 
         $validator = Validator::make($request->all(), [
             'center_id' => 'required|integer|exists:donation_centers,id',
-            'blood_type' => ['required',
-            Rule::in('A+','B+','O+','AB+','A-','B-','O-','AB-')],
+            'blood_type' => ['required'],
             'date' => [
                 'required',
-                'date_format:Y-m-d',
+                // 'date_format:Y-m-d',
                 function ($attribute, $value, $fail) {
                     if (Carbon::parse($value)->isBefore(Carbon::tomorrow())) {
                         $fail('The appointment date must be at least tomorrow.');
                     }
                 },
             ],
-        ],[
+            'time' => 'required|date_format:H:i',
+        ], [
             'center_id.exists' => 'The donation center does not exist.',
         ]);
 
@@ -212,28 +220,37 @@ class AppointmentController extends Controller
             return $this->validationErrors($validator->errors());
         }
 
-        $date = Carbon::parse($request->input('date'));
         $center = DonationCenter::findOrFail($request->input('center_id'));
+
+        $availableTimes = $this->getTimes($center, $request->input('date'), $appointment);
+
+        if (!in_array($request->input('time'), $availableTimes)) {
+            return $this->validationErrors(['general' => ['choosed time is not availalbe']]);
+        }
+
+        $date = Carbon::parse($request->input('date'));
         $appointmentAtDate = Appointment::where('center_id', $center->id)
-            ->whereDate('date',$date)->latest('time')->first();
+            ->whereDate('date', $date)->latest('time')->first();
+        //        if ($appointmentAtDate && Carbon::parse($appointmentAtDate->time)->addMinutes(20)
+        //                ->greaterThanOrEqualTo(Carbon::createFromTime(16, 0, 0))) {
+        //            return $this->validationErrors(['error' => 'No available appointments after 4 PM']);
+        //        }
+        // $nextAvailableTime = $this->getNextAvailableTime($appointmentAtDate);
+        // if ($nextAvailableTime == null)
+        //     return $this->responseError('you cannot take an appointment at this day');
 
-//        if ($appointmentAtDate && Carbon::parse($appointmentAtDate->time)->addMinutes(20)
-//                ->greaterThanOrEqualTo(Carbon::createFromTime(16, 0, 0))) {
-//            return $this->validationErrors(['error' => 'No available appointments after 4 PM']);
-//        }
-        $nextAvailableTime = $this->getNextAvailableTime($appointmentAtDate);
-        if ($nextAvailableTime == null)
-            return $this->responseError('you cannot take an appointment at this day');
-
+        $time = Carbon::parse($request->input('time'));
         $updatedAppointment = $appointment->update([
             'center_id' => $request->input('center_id'),
             'blood_type' => $request->input('blood_type'),
             'date' => $request->input('date'),
-            'time' => $nextAvailableTime
+            'time' => $time
         ]);
 
-        return $this->successResponse(['appointment' => $appointment],
-            "Appointment update successfully");
+        return $this->successResponse(
+            ['appointment' => $appointment],
+            "Appointment update successfully"
+        );
     }
 
     /**
@@ -242,10 +259,85 @@ class AppointmentController extends Controller
     public function destroy(int $id)
     {
         $appointment = Appointment::scheduled()->find($id);
-        if (!$appointment){
+        if (!$appointment) {
             return $this->responseError('appointment is completed and cannot deleted');
         }
         $appointment->delete();
-        return $this->successResponse([],'appointment deleted successfully');
+        return $this->successResponse([], 'appointment deleted successfully');
+    }
+
+
+
+    public function getAvailableTimes(Request $request): array
+    {
+        $request->validate([
+            'date' => 'required|date',
+            'center_id' => 'required|integer|exists:donation_centers,id',
+            'appointment_id' => 'nullable|integer|exists:appointments,id',
+        ]);
+
+        $date = Carbon::parse($request->input('date'))->format('Y-m-d');
+
+        $appointments = Appointment::where(
+            [
+                'date' => $date,
+                'center_id' => $request->input('center_id'),
+            ]
+        )->when($request->input('appointment_id'), function ($q) use ($request) {
+            $q->where('id', '!=', $request->input('appointment_id'));
+        })
+            ->pluck('time')
+            ->map(function ($time) {
+                return Carbon::createFromFormat('H:i:s', $time)->format('H:i');
+            })
+            ->toArray();
+        $times = [];
+
+        $startTime = Carbon::createFromTime(8, 0, 0);
+        $endTime = Carbon::createFromTime(18, 0, 0);
+
+        while ($startTime < $endTime) {
+            $formattedTime = $startTime->format('H:i');
+
+            if (!in_array($formattedTime, $appointments)) {
+                $times[] = $formattedTime;
+            }
+
+            $startTime = $startTime->addMinutes(30);
+        }
+
+        return $times;
+    }
+
+    private function getTimes(DonationCenter $center, string $date, ?Appointment $appointment = null): array
+    {
+        $date = Carbon::parse($date)->format('Y-m-d');
+
+        $appointments = Appointment::where(['date' => $date, 'center_id' => $center->id])
+            ->when($appointment != null, function ($q) use ($appointment) {
+                $q->where('id', '!=', $appointment->id);
+            })
+            ->pluck('time')
+            ->map(function ($time) {
+                return Carbon::createFromFormat('H:i:s', $time)->format('H:i');
+            })
+
+            ->toArray();
+        $times = [];
+
+        $startTime = Carbon::createFromTime(8, 0, 0);
+        $endTime = Carbon::createFromTime(18, 0, 0);
+
+        while ($startTime < $endTime) {
+            $formattedTime = $startTime->format('H:i');
+
+            if (!in_array($formattedTime, $appointments)) {
+                $times[] = $formattedTime;
+            }
+
+            $startTime = $startTime->addMinutes(30);
+        }
+
+        return $times;
     }
 }
