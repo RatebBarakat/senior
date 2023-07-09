@@ -65,13 +65,19 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Role::class);
     }
 
+    /**
+     * Summary of profile
+     * @return \Illuminate\Database\Eloquent\Relations\MorphOne
+     */
     public function profile()
     {
-        return $this->hasOne(Profile::class,'user_id')->withDefault([
+        return $this->morphOne(Profile::class, 'user')->withDefault([
             'user_id' => $this->id,
+            'user_type' => User::class
         ]);
     }
-
+    
+    
     public function deviceTokens(){
         return $this->hasMany(DeviceToken::class);
     }

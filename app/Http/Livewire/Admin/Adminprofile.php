@@ -12,7 +12,7 @@ use Livewire\WithPagination;
 
 class Adminprofile extends Component
 {
-    use WithPagination,WithFileUploads;
+    use WithPagination, WithFileUploads;
 
     public string $name = "";
     public string $location = "";
@@ -20,38 +20,30 @@ class Adminprofile extends Component
     public $oldAvatar;
     public $newAvatar;
 
+    public \App\Models\Profile $profile;
+
     public function mount()
     {
-        $id = auth()->guard('admin')->user()->id;
-        if (!Profile::where('admin_id',$id)->exists()){
-            Profile::create(['admin_id' => $id]);
-        }
-        $this->name = auth()->guard('admin')->user()->name;
-        $this->profile = Profile::where('admin_id',$id)->first();
+        $admin = auth()->guard('admin')->user();
 
-        $this->location = $this->profile->location ? $this->profile->location : '';
-        $this->bio = $this->profile->bio ? $this->profile->bio : '';
+        $this->profile = $admin->profile;
+        $this->location = $this->profile->location ?? '';
+        $this->bio = $this->profile->bio ?? '';
+
     }
 
     #[BlockFrontendAccess]
-    public \App\Models\Profile $profile;
-
-    public function checkprofile() :bool{
-        $authId = Profile::where('admin_id',auth()->guard('admin')->user()->id)->first();
-        return $authId->id === $this->profile->id;
-    }
 
     public function render()
     {
         $this->oldAvatar = $this->profile->avatar;
-        return view('livewire.admin.adminprofile',[
-            'profile' => $this->profile
+        return view('livewire.admin.adminprofile', [
+            'profile' => $this->profile->first()
         ]);
     }
 
     public function updateProfile()
     {
-        if (!$this->checkprofile())abort(403);
         $this->validate([
             'name' => 'required|string|min:2',
             'location' => 'nullable|string|min:2',
@@ -70,26 +62,32 @@ class Adminprofile extends Component
 
             if (!empty($this->oldAvatar)) {
                 try {
-                    unlink('storage/'.$this->oldAvatar);
+                    unlink('storage/' . $this->oldAvatar);
                 } catch (\Throwable $th) {
                     abort(500);
                 }
             }
         }
 
-        $this->profile->update($data);
+        $this->profile->updateOrCreate(
+            [
+                'user_id' => auth('admin')->user()->id,
+                'user_type' => "App\\Models\\Admin"
+            ],
+            $data
+        );
         auth()->guard('admin')->user()->update(['name' => $this->name]);
-        $this->dispatchBrowserEvent('update-name',[
+        $this->dispatchBrowserEvent('update-name', [
             'name' => auth()->guard('admin')->user()->name
         ]);
         $this->alert('success', 'Profile updated successfully.');
     }
 
-    public function alert(string $type,string $message){
-        $this->dispatchBrowserEvent('alert',[
+    public function alert(string $type, string $message)
+    {
+        $this->dispatchBrowserEvent('alert', [
             'type' => $type,
             'message' => $message
         ]);
     }
-
 }

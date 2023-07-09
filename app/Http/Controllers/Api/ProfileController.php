@@ -29,14 +29,15 @@ class ProfileController extends Controller
 
         return ProfileResourse::make($user->profile);
     }
-
     public function update(Request $request)
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'location' => 'required|string|max:100',
             'bio' => 'required|string|max:1000',
-            'blood_type' => ['required',
-                Rule::in('A+','B+','O+','AB+','A-','B-','O-','AB-')],
+            'blood_type' => [
+                'required',
+                Rule::in('A+', 'B+', 'O+', 'AB+', 'A-', 'B-', 'O-', 'AB-')
+            ],
             'avatar' => 'nullable|image|max:1024'
         ]);
 
@@ -45,46 +46,47 @@ class ProfileController extends Controller
         }
 
         $user = request()->user();
+
         $avatar = $user->profile->avatar;
 
-        if ($request->hasFile('avatar')){
+        if ($request->hasFile('avatar')) {
             $name = $request->file('avatar')->getClientOriginalName();
             $extension = $request->file('avatar')->getClientOriginalExtension();
             $avatarName = $name . '_' . Str::random(10) . '.' . $extension;
-            $path = $request->file('avatar')->move(public_path('storage/avatars/'),
-                $avatarName);
+            $path = $request->file('avatar')->move(
+                public_path('storage/avatars/'),
+                $avatarName
+            );
 
             $avatar = $avatarName;
 
             if ($user->profile->avatar) {
                 try {
-                    unlink(public_path('storage/avatars/'.$user->profile->avatar));
+                    unlink(public_path('storage/avatars/' . $user->profile->avatar));
                 } catch (Exception $exception) {
                     // Handle the exception here
                 }
             }
-
         }
 
-        if (!$user->profile) {
-            $user->profile()->create();
-        }
-
-        $user->profile->update([
+        $profileData = [
             'avatar' => $avatar,
             'bio' => $request->input('bio'),
             'blood_type' => $request->input('blood_type'),
             'location' => $request->input('location'),
-        ]);
+        ];
 
-        $user->profile->save();
-
-        $user->load('profile');
+        $user->profile()->updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'user_type' => "App\\Models\\User"
+            ],
+            $profileData
+        );
+        
 
         return $this->successResponse([
             'profile' => ProfileResourse::make($user->profile),
-        ],'Profile updated successfully');
+        ], 'Profile updated successfully');
     }
-
-
 }

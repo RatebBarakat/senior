@@ -15,10 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('location')->nullable();
             $table->text('bio')->nullable();
-            $table->enum('blood_type',['A','B','O','AB'])->nullable();
-            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
-            $table->foreignId('admin_id')->nullable()->constrained('admins')->cascadeOnDelete();
-            $table->foreignId('social_id')->nullable()->constrained('socials-users')->cascadeOnDelete();
+            $table->enum('blood_type', ['A+', 'B+', 'O+', 'AB+', 'A-', 'B-', 'O-', 'AB-'])->nullable();
+            $table->morphs('user');
+            $table->string('avatar', 100)->nullable();
             $table->timestamps();
         });
     }

@@ -46,7 +46,10 @@ class Admin extends Authenticatable
 
     public function profile()
     {
-        return $this->hasOne(Profile::class)->withDefault();
+        return $this->morphOne(Profile::class, 'user')->withDefault([
+            'user_id' => $this->id,
+            'user_type' => get_class($this)
+        ]);
     }
 
     public function isSuperAdmin(): bool
