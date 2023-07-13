@@ -91,6 +91,10 @@ class User extends Authenticatable implements MustVerifyEmail
     //     return $this->deviceTokens()->pluck('token')->toArray();
     // }
 
+    public function social(){
+        return $this->hasOne(Social::class);
+    }
+
     public function receivedMessages()
     {
         return $this->morphMany(Message::class, 'recipient');

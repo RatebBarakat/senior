@@ -10,5 +10,9 @@ class CenterReport extends Model
     protected $guarded = [];
 
     use HasFactory;
+
+    public function ScopeExcel($query){
+        return $query->where('type','excel');
+    }
     
 }

@@ -28,7 +28,6 @@ class DonationCenter extends Model
         return $this->hasMany(BloodRequest::class, 'center_id');
     }
     
-
     public function appointments()
     {
         return $this->hasMany(Appointment::class,'center_id');

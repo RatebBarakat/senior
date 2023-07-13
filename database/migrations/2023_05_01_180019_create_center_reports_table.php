@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('center_reports', function (Blueprint $table) {
             $table->id();
             $table->text('file_name');
+            $table->text('type');
             $table->foreignId('center_id')->constrained('donation_centers','id')->cascadeOnDelete();
             $table->foreignId('admin_id')->nullable()->constrained('admins','id')->nullOnDelete();
             $table->timestamps();
