@@ -4,13 +4,11 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use App\Traits\ResponseApi;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
     use ResponseApi;
-    public function index() : JsonResponse {
+    public function index() {
         try {
             $user = request()->user();
 

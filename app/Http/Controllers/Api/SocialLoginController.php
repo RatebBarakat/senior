@@ -9,74 +9,74 @@ use App\Models\Social;
 use App\Models\User;
 use App\Traits\ResponseApi;
 use Exception;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Throwable;
 
 class SocialLoginController extends Controller
 {
     use ResponseApi;
     public function redirectToProvider(string $provider)
     {
-        if(!$this->checkProvider($provider)){//check provider name if in array
-            return $this->responseError('wrong provider',400);
+        if (!$this->checkProvider($provider)) {
+            return $this->responseError('wrong provider', 400);
         }
-            return Socialite::driver($provider)->stateless()->redirect();
+
+        $redirectUrl = Socialite::driver($provider)->stateless()->redirect()->getTargetUrl();
+
+        return response()->json(['url' => $redirectUrl]);
     }
+
 
     public function handleCallback(string $provider)
     {
-        if(!$this->checkProvider($provider)){
-            $this->responseError('an error occurs');
+        if (!$this->checkProvider($provider)) {
+            $this->responseError('An error occurs');
         }
         try {
             $providerUser = Socialite::driver($provider)->stateless()->user();
-            $user = Social::where('provider', $provider)
-                ->where('email', $providerUser->email)
+            $social = Social::where('provider', $provider)
+                ->where('provider_id', $providerUser->getId())
                 ->first();
-            if (!$user){
-                $user = Social::create([
-                    'name' => $providerUser->name,
-                    'email' => $providerUser->email,
+    
+            if (!$social) {
+                $user = User::updateOrCreate([
+                    'email' => $providerUser->getEmail(), 
+                ],
+                [
+                    'name' => $providerUser->getName(),
+                    'password' => Hash::make(Str::random(16)),
+                    'email_verified_at' => now()
+                ]);
+    
+                $social = Social::create([
+                    'user_id' => $user->id,
                     'provider' => $provider,
                     'provider_id' => $providerUser->getId(),
-                    'provider_token' => $providerUser->token
+                    'provider_token' => $providerUser->token,
                 ]);
+            } else {
+                $user = $social->user;
             }
-            else{
-                $user->update([
-                    'provider' => $provider,
-                    'provider_id' => $providerUser->getId(),
-                    'provider_token' => $providerUser->token
-                ]);
-            }
+    
             $this->updateUserAvatar($providerUser, $user);
-
+    
             $token = $user->createToken('my_token')->plainTextToken;
-
-            $user->load('profile');
-
-            \auth()->guard('social')->login($user);
-
-            return redirect('/');
-
-//            return $this->successResponse([
-//                'token' => $token,
-//                'user' => UserResourse::make($user),
-//                'profile' => $user->profile
-//            ],'success login');
+            return response()->json(['token' => $token, 'user' => $user, 'type' => 'social']);
         } catch (Exception $e) {
-            dd($e->getMessage());
+            return response()->json($e->getMessage());
         }
+    }
+    
 
-}
-
-    protected function checkProvider(string $provider):bool
+    protected function checkProvider(string $provider): bool
     {
-        return in_array($provider,['google','facebook']);
+        return in_array($provider, ['google', 'facebook']);
     }
 
     /**
@@ -86,26 +86,25 @@ class SocialLoginController extends Controller
      */
     protected function updateUserAvatar($providerUser, $user): void
     {
-
-        // Save the user's avatar
         $avatarUrl = $providerUser->getAvatar();
         $avatarContents = file_get_contents($avatarUrl);
         $filename = 'avatar' . Str::random(10) . '.jpg';
-        Storage::disk('public')->put('avatars/' . $filename, $avatarContents);
-
-        // Delete the user's old avatar if it exists
+        $filePath = 'avatars/' . $filename;
+        $fullPath = public_path('storage/' . $filePath);
+        file_put_contents($fullPath, $avatarContents);
         if ($user->profile->avatar) {
             try {
-                Storage::disk('public')->delete('avatars/' . $user->profile->avatar);
+                unlink(asset('storage/avatars/'.$user->profile->avatar));
             } catch (Exception $exception) {
-                // Handle the exception here
             }
         }
 
-        // Update the user's profile with the new avatar
-        $user->profile()->updateOrCreate([],[
-            'avatar' => $filename,
-        ]);
-
+        $user->profile()->updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'user_type' => "App\\Models\\Social"
+            ],
+            ['avatar' => $filename]
+        );
     }
 }

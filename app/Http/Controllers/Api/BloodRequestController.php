@@ -8,6 +8,7 @@ use App\Jobs\NotifyAdminsBloodRequest;
 use App\Models\BloodRequest;
 use App\Models\Donation;
 use App\Models\DonationCenter;
+use App\Models\User;
 use App\Traits\ResponseApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -25,6 +26,8 @@ class BloodRequestController extends Controller
 
     public function store(Request $request)
     {
+        $user = request()->user();
+        
         $validator = Validator::make($request->all(), [
             'patient_name' => 'required|string',
             'hospital_name' => 'required|string',
@@ -44,7 +47,8 @@ class BloodRequestController extends Controller
         $center = DonationCenter::findOrFail($request->input('center_id'));
 
         if ($this->checkCompatibility($center, $request->input('blood_type_needed'), $request->input('quantity_needed'))) {
-            $bloodRequest = BloodRequest::create(array_merge($validator->validated(), ['user_id' => $request->user()->id]));
+            $bloodRequest = BloodRequest::create(array_merge($validator->validated(),
+             ['user_id' => $user->id]));
             dispatch(new NotifyAdminsBloodRequest($bloodRequest));
             return $this->successResponse(['bloodRequest' => $bloodRequest], 'request addedd successfully');
         }
@@ -63,13 +67,13 @@ class BloodRequestController extends Controller
     }
     public function show(int $id)
     {
-        $blood = BloodRequest::findOrFail($id);
+        $blood = request()->user()->requests()->findOrFail($id);
         return BloodRequestResourse::make($blood);
     }
 
     public function update(Request $request, int $id)
     {
-        $bloodRequest = BloodRequest::find($id);
+        $bloodRequest = request()->user()->requests()->find($id);
 
         if(!$bloodRequest){
             return $this->responseError('the request was not found');

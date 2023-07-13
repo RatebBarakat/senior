@@ -21,43 +21,43 @@ class LoginController extends Controller
         $this->middleware('guest:sanctum');
     }
 
-    public function Adminlogin(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 400);
-        }
-        $admin = Admin::where('email', $request->input('email'))->first();
-        if (!$admin) {
-            return response()->json(['errors' => 'credentials not match record'], 400);
-        }
-        if ($admin) {
-            $role = $admin->role;
-            if ($role) {
-                if ($role->name == 'super admin') $permissions = ['*'];
-                else $permissions = $role->permissions->pluck('name')->toArray();
-            } else {
-                $permissions = [];
-            }
-        } else {
-            $permissions = [];
-        }
-        if (Hash::check($request->input('password'), $admin->password)) {
-            $token = $admin->createToken(
-                $request->input('email') . 'Token',
-                $permissions,
-                now()->addHours(2)
-            )->plainTextToken;
-            return response()->json([
-                'token' => $token, 'admin' => AdminResourse::make($admin),
-                'permissions' => $permissions
-            ]);
-        }
-        return response()->json(['errors' => 'wrong password'], 400);
-    }
+    // public function Adminlogin(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'email' => 'required|email',
+    //         'password' => 'required|string',
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['errors' => $validator->errors()], 400);
+    //     }
+    //     $admin = Admin::where('email', $request->input('email'))->first();
+    //     if (!$admin) {
+    //         return response()->json(['errors' => 'credentials not match record'], 400);
+    //     }
+    //     if ($admin) {
+    //         $role = $admin->role;
+    //         if ($role) {
+    //             if ($role->name == 'super admin') $permissions = ['*'];
+    //             else $permissions = $role->permissions->pluck('name')->toArray();
+    //         } else {
+    //             $permissions = [];
+    //         }
+    //     } else {
+    //         $permissions = [];
+    //     }
+    //     if (Hash::check($request->input('password'), $admin->password)) {
+    //         $token = $admin->createToken(
+    //             $request->input('email') . 'Token',
+    //             $permissions,
+    //             now()->addHours(2)
+    //         )->plainTextToken;
+    //         return response()->json([
+    //             'token' => $token, 'admin' => AdminResourse::make($admin),
+    //             'permissions' => $permissions
+    //         ]);
+    //     }
+    //     return response()->json(['errors' => 'wrong password'], 400);
+    // }
 
     public function Userlogin(Request $request)
     {
@@ -66,9 +66,9 @@ class LoginController extends Controller
         $decaySeconds = 180; //3 min
 
         if (RateLimiter::tooManyAttempts($key, $maxAttempts, $decaySeconds)) {
-            $seconds = RateLimiter::availableIn($key);
+            // $seconds = RateLimiter::availableIn($key);
             return response()->json(['errors' => [
-                'general' => ['Too many attempts. Please try again in ' . $seconds . ' seconds.']
+                'general' => ['Too many attempts']
             ]], 400);
         }
 
