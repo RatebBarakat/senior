@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\SocialLoginController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\LoginController;
@@ -22,8 +23,12 @@ use App\Models\DonationCenter;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-use Illuminate\Support\Facades\URL;
-use Carbon\Carbon;
+
+
+Route::get('auth/{provider}', [SocialLoginController::class, 'redirectToProvider'])
+    ->name('google.redirect');
+Route::post('auth/{provider}/callback', [SocialLoginController::class, 'handleCallback'])
+    ->name('google.callback');
 
 Route::get('/centers', function () {
     // if(cache()->has('centers')){
@@ -56,6 +61,7 @@ Route::middleware(['auth:sanctum', 'verified'])->prefix('user')->name('user.')->
 
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::post('/', [ProfileController::class, 'update'])->name('update');
+        Route::get('/syncAvatar',[ProfileController::class,'syncAvatar']);
         Route::apiResource('', ProfileController::class)->only('index');
     });
 
