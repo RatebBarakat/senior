@@ -59,7 +59,6 @@ class Appointments extends Component
             'quantity' => 'required|integer|min:1|max:3',
             'expire_at' => 'required|date|after:tomorrow',
         ]);
-
         $this->appointment->load('center','user');
 
         try {

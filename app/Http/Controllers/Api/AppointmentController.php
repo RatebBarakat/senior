@@ -121,8 +121,7 @@ class AppointmentController extends Controller
     }
     private function createNewAppointment($user, DonationCenter $center, Carbon $date, Carbon $time, $blood_type)
     {
-        return Appointment::create([
-            'user_id' => $user->id,
+        return $user->appointments()->create([
             'center_id' => $center->id,
             'status' => 'scheduled',
             'date' => $date->format('Y-m-d'),
@@ -186,10 +185,9 @@ class AppointmentController extends Controller
     public function update(Request $request, int $id)
     {
         $user = \request()->user();
-        $appointment = Appointment::where(function ($q) use ($user, $id) {
-            $q->where('user_id', $user->id)
-                ->where('id', $id);
-        })->first();
+
+
+        $appointment = $user->appointments()->find($id);
 
         if (!$appointment) {
             return $this->responseError('the appointment doesnt exists');
@@ -258,7 +256,9 @@ class AppointmentController extends Controller
      */
     public function destroy(int $id)
     {
-        $appointment = Appointment::scheduled()->find($id);
+        $user = request()->user();
+
+        $appointment = $user->appointments()->scheduled()->find($id);
         if (!$appointment) {
             return $this->responseError('appointment is completed and cannot deleted');
         }
