@@ -25,7 +25,7 @@ trait ResponseApi
     }
     protected function validationErrors($errors):JsonResponse
     {
-        return response()->json($errors,400);
+        return response()->json($errors,412);
     }
     protected function responseError(string $message,int $status = 400):JsonResponse
     {
