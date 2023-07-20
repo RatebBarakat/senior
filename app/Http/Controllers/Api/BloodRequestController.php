@@ -11,6 +11,7 @@ use App\Models\DonationCenter;
 use App\Models\User;
 use App\Traits\ResponseApi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -51,7 +52,7 @@ class BloodRequestController extends Controller
              ['user_id' => $user->id]));
             dispatch(new NotifyAdminsBloodRequest($bloodRequest));
             return $this->successResponse(['bloodRequest' => $bloodRequest], 'request addedd successfully');
-        }
+        }//else check for centers if exists another
 
         $center = $this->getAvailableCenter($request->input('blood_type_needed'), $request->input('quantity_needed'));
 

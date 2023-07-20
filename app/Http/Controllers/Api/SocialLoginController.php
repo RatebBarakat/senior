@@ -62,6 +62,11 @@ class SocialLoginController extends Controller
                 ]);
             } else {
                 $user = $social->user;
+                $social->update([
+                    'provider' => $provider,
+                    'provider_id' => $providerUser->getId(),
+                    'provider_token' => $providerUser->token,
+                ]);
             }
     
             $this->updateUserAvatar($providerUser, $user);
@@ -102,7 +107,7 @@ class SocialLoginController extends Controller
         $user->profile()->updateOrCreate(
             [
                 'user_id' => $user->id,
-                'user_type' => "App\\Models\\Social"
+                'user_type' => get_class($user)
             ],
             ['avatar' => $filename]
         );
