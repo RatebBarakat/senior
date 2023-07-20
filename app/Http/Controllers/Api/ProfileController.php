@@ -29,6 +29,14 @@ class ProfileController extends Controller
         //     return $this->responseError('profile not found');
         // }
 
+        if(\request()->get('value') == 'avatar'){
+            return response()->json([
+                'avatar' => $user->profile->avatar
+                ? asset('storage/avatars/'.$user->profile->avatar) 
+                : null
+            ]);
+        }
+
         return ProfileResourse::make($user->profile);
     }
     public function update(Request $request)
@@ -95,12 +103,11 @@ class ProfileController extends Controller
     public function syncAvatar(){
         $user = request()->user();
         if(!$user->social()->exists()){
-            response()->json('not linked');
+            return response()->json(['data' => 'not linked']);
         }else{
             $socialUser = Social::where('user_id',$user->id)->first();
             $providerUser = Socialite::driver('google')->stateless()
             ->userFromToken($socialUser->provider_token);
-
             $avatarUrl = $providerUser->getAvatar();
             $avatarContents = file_get_contents($avatarUrl);
             $filename = 'avatar' . Str::random(10) . '.jpg';
