@@ -22,7 +22,7 @@
                         <td>
                             <input type="checkbox" wire:model.defer="selectedAdmins" value="{{$appointment->id}}">
                         </td>
-                        <td>{{$appointment->user->name}}</td>
+                        <td>{{$appointment->user?->name ?? $appointment->admin?->name ?? 'no name'}}</td>
                         <td>{{$appointment->blood_type}}</td>
                         <td>
                             {{$appointment->date}}
@@ -62,7 +62,7 @@
         <div class="modal-dialog" employee="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">delete employees</h5>
+                    <h5 class="modal-title">complete appointment</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\ExcelController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\SocialLoginController;
 use App\Http\Controllers\Center\ReportController;
 use App\Models\Permission;
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
 Route::get('/email/verify/{id}/{expiry}/{token}', function ($id, $expiry, $token) {
 
     if (!request()->hasValidSignature()) {
@@ -36,17 +38,12 @@ Route::get('/email/verify/{id}/{expiry}/{token}', function ($id, $expiry, $token
     $user = User::find($id);
 
     if (!$user || !hash_hmac('sha256', $user->getEmailForVerification() . $expiry, env('APP_KEY')) === $token) {
-        return 'Invalid verification link.';
-    }
-
-    if ($user->email_verified_at) {
-        return 'Your email has already been verified.';
+        return 'Invalid link.';
     }
 
     $user->email_verified_at = now();
     $user->save();
-
-    return redirect()->to('http://localhost:8080/verify-email');
+    return redirect()->to('http://localhost:8080/login?message=verified');
 })->name('verification.verify')->middleware(['signed']);
 
 Route::post('/email/verification-notification', function (Request $request) {
@@ -84,13 +81,18 @@ Route::get('auth/{provider}', [SocialLoginController::class, 'redirectToProvider
 Route::get('auth/{provider}/callback', [SocialLoginController::class, 'handleCallback'])
     ->name('google.callback');
 
-Route::get('/login', function () {
-    \Illuminate\Support\Facades\Auth::guard('admin')->login(\App\Models\Admin::first());
-});
+// Route::get('/login', function () {
+//     \Illuminate\Support\Facades\Auth::guard('admin')->login(\App\Models\Admin::first());
+// });
 
 Route::get('/admin/set-password/{id}/{token}', [AdminPasswordController::class, 'show'])->name('admin.setPassword');
-Route::post('/admin/set-password/{id}/{token}', [AdminPasswordController::class, 'setPassword'])->name('admin.storePassword');
+Route::post('/admin/set-password/{id}/{token}', [AdminPasswordController::class, 'setPassword'])
+    ->middleware('signed')->name('admin.storePassword');
 
+Route::get('/change-password/{token}', [AuthController::class, 'show'])
+    ->name('changePassword.show');
+Route::post('/change-password/reset/{token}', [AuthController::class, 'setPassword'])
+    ->name('changePassword.storePassword');
 
 Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function () {
 
@@ -156,10 +158,11 @@ Route::middleware('auth:admin')->prefix('admin')->name('admin.')->group(function
             Route::view('/', 'admin.center.index')->name('index');
             Route::view('/report', 'admin.center.reports')->name('reports');
             Route::post('/report/create', [ReportController::class, 'generateReport'])
-            ->name('reports.store');
+                ->name('reports.store');
             Route::name('excel.')->group(function () {
                 Route::get('/excel', [ExcelController::class, 'index'])->name('index');
                 Route::get('/excel/create', [ExcelController::class, 'create'])->name('create');
+                Route::post('/excel/store', [ExcelController::class, 'inportExcel'])->name('store');
             });
         });
 

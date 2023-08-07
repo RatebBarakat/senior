@@ -187,7 +187,7 @@
         <div class="modal-dialog" event="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Modal Title</h5>
+                    <h5 class="modal-title">edit</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                             wire:click="hideAddModal">
                         <span aria-hidden="true">&times;</span>

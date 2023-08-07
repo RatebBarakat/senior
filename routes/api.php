@@ -7,9 +7,12 @@ use App\Http\Controllers\Api\SocialLoginController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Admin\LoginController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BloodRequestController;
 use App\Http\Controllers\api\NotificationController;
 use App\Http\Controllers\Api\RegisterController;
+use App\Http\Controllers\CountUserRelationController;
+use App\Http\Controllers\EventController;
 use App\Http\Resources\CenterResource;
 use App\Models\DonationCenter;
 
@@ -39,6 +42,10 @@ Route::get('/centers', function () {
     return CenterResource::collection($centers);
 });
 
+Route::get('/forgot-password', function () {
+    return view('auth.forgot-password');
+})->middleware('guest')->name('password.request');
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -47,6 +54,7 @@ Route::prefix('admin')->group(function () {
 });
 Route::prefix('user')->group(function () {
     Route::post('/login', [LoginController::class, 'Userlogin']);
+    Route::post('spa/login', [LoginController::class, 'spaLogin']);
 });
 
 Route::get('/dash', function () {
@@ -59,11 +67,20 @@ Route::middleware(['auth:sanctum', 'api.admin'])->group(function () {
 
 Route::middleware(['auth:sanctum', 'verified'])->prefix('user')->name('user.')->group(function () {
 
+    Route::post('/logout',function() {
+        request()->user()->tokens()->delete();
+        return response()->json([['status' => 'success']]);
+    });
+
+    Route::get('/count',[CountUserRelationController::class,'index']);
+
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::post('/', [ProfileController::class, 'update'])->name('update');
         Route::get('/syncAvatar',[ProfileController::class,'syncAvatar']);
         Route::apiResource('', ProfileController::class)->only('index');
     });
+
+    Route::get('/event/upcoming',[EventController::class,'upcomingEvent']);
 
     Route::get('/notification', [NotificationController::class, 'index']);
 
@@ -82,4 +99,5 @@ Route::middleware(['auth:sanctum', 'verified'])->prefix('user')->name('user.')->
 
 Route::middleware('guest:sanctum')->group(function () {
     Route::post('/user/register', [RegisterController::class, 'register']);
+    Route::post('/user/sendResetPassword',[AuthController::class,'sendResetPassword']);
 });

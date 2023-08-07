@@ -2,26 +2,24 @@
 
 namespace App\Notifications;
 
-use App\Models\Admin;
+use App\Models\BloodRequest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class NotifyAdminPassword extends Notification implements ShouldQueue
+class notifyBloodRequestUrgent extends Notification implements ShouldQueue
 {
     use Queueable;
-
-    private Admin $admin;
-    private string $token;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(Admin $admin,string $token)
+    protected BloodRequest $BloodRequest;
+
+    public function __construct(BloodRequest $BloodRequest)
     {
-        $this->admin = $admin;
-        $this->token = $token;
+        $this->BloodRequest = $BloodRequest;
     }
 
     /**
@@ -31,7 +29,7 @@ class NotifyAdminPassword extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**
@@ -39,10 +37,9 @@ class NotifyAdminPassword extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $role = $this->admin->role ? $this->admin->role->name : 'admin';
         return (new MailMessage)
-                    ->line("set your account password as {$role}")
-                    ->action('click here ', route('admin.setPassword',[$this->admin->id,$this->token]))
+                    ->line('uregente need for donation.')
+                    ->line("we need donation of type {$this->BloodRequest->blood_type_needed} at {$this->BloodRequest->center->name}", url('/'))
                     ->line('Thank you for using our application!');
     }
 
@@ -54,7 +51,7 @@ class NotifyAdminPassword extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'message' => "we need donation of type {$this->BloodRequest->blood_type_needed} at {$this->BloodRequest->center->name}",
         ];
     }
 }

@@ -117,7 +117,7 @@
         <div class="modal-dialog" center="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Modal Title</h5>
+                    <h5 class="modal-title">edit</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                             wire:click="hideAddModal">
                         <span aria-hidden="true">&times;</span>
@@ -132,15 +132,17 @@
                             <input type="text" wire:model.defer="name" class="form-control">
                         </div>
                         @if($center != null)
+                        <div class="form-group">
+                            <label for="">location</label>
                             <select class="custom-select" wire:model="location_id" name="" id="">
-                                <option value="0">select a locarion</option>
+                                <option value="0">select a location</option>
                                 @foreach($locations as $location)
                                     <option value="{{$location->id}}">
                                         {{$location->name}}
                                     </option>
                                 @endforeach
                             </select>
-
+                        </div>
                             <div class="form-group">
                                 <label for="admin-center">admin center</label>
                                 <select name="" id="" wire:model.defer="admin_id" class="custom-select">
@@ -171,7 +173,7 @@
         <div class="modal-dialog" center="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">delete centers</h5>
+                    <h5 class="modal-title">delete center</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

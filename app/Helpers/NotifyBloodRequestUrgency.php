@@ -2,19 +2,19 @@
 
 namespace App\Helpers;
 
-use App\Jobs\SendPdfByEmail;
 use App\Models\Admin;
 use App\Models\Appointment;
+use App\Models\BloodRequest;
 use App\Models\Event;
 use App\Models\User;
-use App\Notifications\notifyEventCreated as NotificationsNotifyEventCreated;
+use App\Notifications\notifyBloodRequestUrgent;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Notification;
 
-class NotifyEventCreated 
+class NotifyBloodRequestUrgency 
 {
-    public static function notifyUsers(Event $event)
+    public static function notifyUsers(BloodRequest $bloodRequest)
     {
         $users = User::whereDoesntHave('appointments')
             ->orWhereHas('appointments', function (Builder $query) {
@@ -30,7 +30,7 @@ class NotifyEventCreated
 
         $actors = $users->merge($admins);
 
-        Notification::send($users, new NotificationsNotifyEventCreated($event));
-        Notification::send($admins, new NotificationsNotifyEventCreated($event));
+        Notification::send($users, new notifyBloodRequestUrgent($bloodRequest));
+        Notification::send($admins, new notifyBloodRequestUrgent($bloodRequest));
     }
 }

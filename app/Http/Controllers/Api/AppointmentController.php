@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AppointmentResource;
 use App\Models\Appointment;
 use App\Models\DonationCenter;
-use App\Models\Social;
+use App\Models\Admin;
 use App\Models\User;
 use App\Traits\ResponseApi;
 use Illuminate\Http\JsonResponse;
@@ -58,6 +58,11 @@ class AppointmentController extends Controller
     public function store(Request $request)
     {
         $user = \request()->user();
+        $user->load('profile');
+
+        if(!$user->profile?->blood_type){
+            return $this->validationErrors(['general' => ['you should set the blood type in your profile yo be able to create an appointemtn']]);
+        }
 
         if ((string) $errorMessage = $this->canScheduleAppointment($user)) {
             return $this->validationErrors(['general' => [$errorMessage]]);
@@ -65,7 +70,6 @@ class AppointmentController extends Controller
 
         $validator = Validator::make($request->all(), [
             'center_id' => 'required|integer|exists:donation_centers,id',
-            'blood_type' => ['required'],
             'date' => [
                 'required',
                 // 'date_format:Y-m-d',
@@ -110,7 +114,7 @@ class AppointmentController extends Controller
             $center,
             $date,
             $time,
-            $request->input('blood_type')
+            $user->profile->blood_type
         );
 
         return $this->successResponse(
@@ -144,7 +148,7 @@ class AppointmentController extends Controller
 
     //     return $nextAvailableTime;
     // }
-    private function canScheduleAppointment(Social|User $user): ?string
+    private function canScheduleAppointment(Admin|User $user): ?string
     {
         $now = Carbon::now();
         $twoMonthsFromNow = $now->copy()->addMonths(2);
@@ -186,6 +190,11 @@ class AppointmentController extends Controller
     {
         $user = \request()->user();
 
+        $user->load('profile');
+
+        if(!$user->profile?->blood_type){
+            return $this->validationErrors(['general' => ['you should set the blood type in your profile yo be able to create an appointemtn']]);
+        }
 
         $appointment = $user->appointments()->find($id);
 
@@ -199,10 +208,9 @@ class AppointmentController extends Controller
 
         $validator = Validator::make($request->all(), [
             'center_id' => 'required|integer|exists:donation_centers,id',
-            'blood_type' => ['required'],
+            // 'blood_type' => ['required'],
             'date' => [
                 'required',
-                // 'date_format:Y-m-d',
                 function ($attribute, $value, $fail) {
                     if (Carbon::parse($value)->isBefore(Carbon::tomorrow())) {
                         $fail('The appointment date must be at least tomorrow.');
@@ -240,7 +248,6 @@ class AppointmentController extends Controller
         $time = Carbon::parse($request->input('time'));
         $updatedAppointment = $appointment->update([
             'center_id' => $request->input('center_id'),
-            'blood_type' => $request->input('blood_type'),
             'date' => $request->input('date'),
             'time' => $time
         ]);
@@ -268,13 +275,17 @@ class AppointmentController extends Controller
 
 
 
-    public function getAvailableTimes(Request $request): array
+    public function getAvailableTimes(Request $request): array|JsonResponse
     {
-        $request->validate([
+        $validator = Validator::make($request->all(),[
             'date' => 'required|date',
             'center_id' => 'required|integer|exists:donation_centers,id',
             'appointment_id' => 'nullable|integer|exists:appointments,id',
         ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrors($validator->errors());
+        }
 
         $date = Carbon::parse($request->input('date'))->format('Y-m-d');
 

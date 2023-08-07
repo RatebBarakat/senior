@@ -98,7 +98,7 @@
                     <div class="modal-body">
                         <span class="text-danger">@error('employee_id'){{$message}}@enderror</span>
                         <select name="" id="" wire:model="employee_id" class="custom-select">
-                            <option value="0">filter by role</option>
+                            <option value="0">available employees</option>
                             @foreach($availableEmployees as $availableEmployee)
                                 <option value="{{$availableEmployee->id}}">
                                     {{$availableEmployee->name}}
@@ -109,7 +109,9 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal"
                                 wire:click="hideAddModal">Close</button>
-                        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary">Save changes</button>
+                        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary">
+                            add employee
+                        </button>
                     </div>
                 </form>
             </div>

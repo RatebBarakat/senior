@@ -51,7 +51,7 @@
             </div>
             <div class="contant_box_404">
             <h3 class="h2">
-                <h2 class="text-danger" style="color: red">{{$exception->getMessage()}}  </h2>
+                {{-- <h2 class="text-danger" style="color: red">{{$exception->getMessage()}}  </h2> --}}
 
             </h3>
             

@@ -27,6 +27,15 @@ class Admin extends Authenticatable
         'password_token'
     ];
 
+    public function requests()
+    {
+        return $this->hasMany(BloodRequest::class,'admin_id','id');
+    }
+
+    public function appointments(){
+        return $this->hasMany(Appointment::class,'admin_id','id');
+    }
+
     public function attachRole($roleName)
     {
         $role = Role::where('name', $roleName)->firstOrFail();

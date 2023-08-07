@@ -5,6 +5,7 @@ namespace App\Http\Livewire\Admin\Center;
 use App\Models\Appointment;
 use App\Models\Donation;
 use Carbon\Carbon;
+use League\OAuth1\Client\Server\User;
 use Livewire\Component;
 use Lean\LivewireAccess\WithImplicitAccess;
 use Livewire\WithPagination;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use App\Notifications\SendPdfEmail;
 use App\Helpers\AppointmentPdf;
 use App\Jobs\SendAppointmentEmailJob;
+use App\Notifications\AppointmentCompleted;
 use TCPDF;
 
 class Appointments extends Component
@@ -63,24 +65,29 @@ class Appointments extends Component
 
         try {
             DB::beginTransaction();
+
+            $actor = $this->appointment->user ?? $this->appointment->admin;
+            $type = $actor instanceof User ? 'user_id' : 'admin_id';
         
             Donation::create([
                 'quantity' => $this->quantity,
                 'blood_type' => $this->appointment->blood_type,
-                'user_id' => $this->appointment->user->id, 
+                $type => $actor->id, 
                 'appointment_id' => $this->appointment->id, 
                 'center_id' => $this->appointment->center->id, 
                 'date' => Carbon::now()->format('y-m-d'),
                 'expire_at' => $this->expire_at
             ]);
-        
-            $pdfName = AppointmentPdf::generatePdf($this->appointment, $this->quantity,'test back');
+            
+            $actor->notify(new AppointmentCompleted($this->appointment));
+            // $pdfName = AppointmentPdf::generatePdf($this->appointment,
+            //  $this->quantity,'test back');
             
         
             $this->appointment->update([
                 'status' => 'complete',
                 'quantity' => $this->quantity,
-                'pdf_file' => $pdfName
+                // 'pdf_file' => $pdfName
             ]);
         
             DB::commit();

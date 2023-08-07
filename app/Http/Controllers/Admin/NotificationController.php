@@ -19,6 +19,7 @@ class NotificationController extends Controller
         }
 
         $notification->markAsRead();
+        
         return response()->json(request()->input('url'));
 
     }

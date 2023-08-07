@@ -24,6 +24,7 @@ return new class extends Migration
             $table->enum('status',['pending','fulfilled','cancelled'])->default('pending');
             $table->foreignId('center_id')->nullable()->constrained('donation_centers')->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('admin_id')->nullable()->constrained('admins')->nullOnDelete();
             $table->timestamps();
         });
     }

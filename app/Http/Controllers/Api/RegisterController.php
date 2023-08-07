@@ -19,6 +19,7 @@ class RegisterController extends Controller
             'name' => ['required', 'string', 'max:255','unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users', 'not_regex:/@live\.bd\.lb$/i'],
             'password' => ['required', 'string', 'min:8'],
+            // 'password_confirm' => ['required', 'same:password'],
         ],[
             'email.not_regex' => 'please enter valid email format',
         ]);

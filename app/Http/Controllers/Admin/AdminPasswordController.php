@@ -15,7 +15,7 @@ class AdminPasswordController extends Controller
         $admin = Admin::findOrFail($id);
         if ($admin->password_token === $token) {
             return view('admin.setPassword',compact('id','token'));
-        }else {
+        } else {
             abort(404);
         }
     }

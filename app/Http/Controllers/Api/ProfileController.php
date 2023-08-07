@@ -82,9 +82,12 @@ class ProfileController extends Controller
         $profileData = [
             'avatar' => $avatar,
             'bio' => $request->input('bio'),
-            'blood_type' => $request->input('blood_type'),
             'location' => $request->input('location'),
         ];
+
+        if (is_null($user->profile->blood_type) && $request->has('blood_type')) {
+            $profileData['blood_type'] = $request->input('blood_type');
+        }
 
         $user->profile()->updateOrCreate(
             [

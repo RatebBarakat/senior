@@ -27,11 +27,9 @@
                         {{$message->sender->name}}
                     </td>
                     <td>
-                        <button class="btn btn-outline-primary btn-sm"
-                                wire:click="markAsRead({{$message->id}})"
-                                wire:loading.attr="disabled" wire:target="markAsRead({{$message->id}})">
-                            mark as read
-                        </button>
+                        <a class="btn btn-outline-primary btn-sm" href="{{route('admin.events.index')}}">
+                            create event
+                        </a>
                     </td>
                 </tr>
             @empty

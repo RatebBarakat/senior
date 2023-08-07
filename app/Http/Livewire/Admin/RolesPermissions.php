@@ -32,7 +32,7 @@ class RolesPermissions extends Component
 
     public function render()
     {
-        $roles = Role::where('name','<>','super-admin')->when(!empty($this->search),function ($q){
+        $roles = Role::when(!empty($this->search),function ($q){
             $q->where('name','like','%'.$this->search.'%');
         })->paginate(abs($this->perPage));
 //        $roles->count() > count($this->selectedRoles) ?

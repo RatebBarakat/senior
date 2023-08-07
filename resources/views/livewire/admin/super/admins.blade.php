@@ -129,7 +129,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal"
                                 wire:click="hideAddModal">Close</button>
-                        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary">Save changes</button>
+                        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary">create</button>
                     </div>
                 </form>
             </div>
@@ -140,7 +140,7 @@
         <div class="modal-dialog" admin="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Modal Title</h5>
+                    <h5 class="modal-title">edit</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                             wire:click="hideAddModal">
                         <span aria-hidden="true">&times;</span>
@@ -177,7 +177,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal"
                                 wire:click="hideEditModal">Close</button>
-                        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary">Save changes</button>
+                        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary">update</button>
                     </div>
                 </form>
             </div>

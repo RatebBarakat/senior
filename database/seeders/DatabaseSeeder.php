@@ -29,12 +29,15 @@ class DatabaseSeeder extends Seeder
             'events' => 'm,c,r,u,d',
             'blood-requests' => 'm,c,r,u,d',
             'reports' => 'm,c,r,u,d',
+            'locations' => 'm,c,r,u,d',
         ];
         $rolesArray = [
             'super admin' => [
                 'admins' => 'm,c,r,u,d',
                 'roles' => 'm,c,r,u,d',
                 'centers' => 'm,c,r,u,d',
+                'locations' => 'm,c,r,u,d',
+                'events' => 'm,c,r,u,d',
             ],
             'center admin' => [
                 'employees' => 'm,c,d',
@@ -103,6 +106,11 @@ class DatabaseSeeder extends Seeder
             'beirut' => ['beirut' => ['latitude' => '1.145', 'longitude' => '3.2']],
             'saida' => ['saida' => ['latitude' => '12.145', 'longitude' => '33.2']],
         ];
+        $permission = Permission::create([
+            'name' => 'request-event',
+            'slug' => 'request-event',
+        ]);
+        Role::where("name",'center-admin')->first()->permissions()->attach($permission);
 
         foreach ($locations as $city => $location) {
             foreach ($location as $name => $coords) {
@@ -118,7 +126,8 @@ class DatabaseSeeder extends Seeder
                     'password' => '$2y$10$SU7fXZaVS6ArumU9zCiu0OExbt9dJ.3OqEwGIBsPU2GbZL87yFuMy',
                     'role_id' => Role::where('name','center-admin')->first()->id,
                 ]);
-                DonationCenter::create([
+
+                $center = DonationCenter::create([
                     'name' => $name ,
                     'location_id' => $location->id,
                     'admin_id' => $adminCenter->id
@@ -129,6 +138,7 @@ class DatabaseSeeder extends Seeder
                     'email' => $name.'-emp@live.bd.lb',
                     'password' => '$2y$10$SU7fXZaVS6ArumU9zCiu0OExbt9dJ.3OqEwGIBsPU2GbZL87yFuMy',
                     'role_id' => Role::where('name','center-employee')->first()->id,
+                    'center_id' => $center->id
                 ]);
                 
             }

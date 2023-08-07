@@ -13,18 +13,12 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        "http://localhost:3000/*"
+        'http://localhost:8080/*',
     ];
 
     public function handle($request, Closure $next)
     {
         $request->headers->set('Access-Control-Allow-Origin', 'http://localhost:8080');
-
-        $referer = $request->headers->get('referer');
-        if ($referer && strpos($referer, 'http://localhost:3000') === 0) {
-            // Disable CSRF token verification for requests coming from React
-            return $next($request);
-        }
 
         return parent::handle($request, $next);
     }

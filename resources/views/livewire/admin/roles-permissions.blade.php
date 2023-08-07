@@ -26,13 +26,9 @@
                         {{--                    </td>--}}
                         <td>{{$role->name}}</td>
                         <td>
-                            @if($role->name == 'super-admin')
-                                *
-                            @else
-                                @foreach($role->permissions as $permission)
-                                    {{$permission->name}}   @if (!$loop->last), @endif
-                                @endforeach
-                            @endif
+                            @foreach($role->permissions as $permission)
+                                {{$permission->name}}   @if (!$loop->last), @endif
+                            @endforeach
                         </td>
                         <td>
                             <button class="btn btn-outline-primary btn-sm"
@@ -102,7 +98,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Modal Title</h5>
+                    <h5 class="modal-title">edit</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                             wire:click="hideAddModal">
                         <span aria-hidden="true">&times;</span>

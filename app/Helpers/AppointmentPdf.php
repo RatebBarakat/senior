@@ -11,7 +11,7 @@ class AppointmentPdf
     public static function generatePdf(Appointment $appointment,int $quantity,$subject = 'appointment complete')
     {
           
-        $pdfName = $appointment->user->name . now()->format('YmdHis') . '.pdf';
+        $pdfName = $appointment->user?->name ?? $appointment->admin?->name . now()->format('YmdHis') . '.pdf';
         dispatch(new SendPdfByEmail($appointment,$pdfName,$quantity,'pdf test'));
         return $pdfName;
             

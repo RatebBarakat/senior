@@ -102,6 +102,8 @@ class Events extends Component
 
         $this->attachCenters($this->event,$this->selectedcenters);
 
+        (new NotifyEventCreated)->notifyUsers($this->event);//send notifications
+
         $this->alert('success','event updated succeefully');
         $this->hideEditModal();
     }

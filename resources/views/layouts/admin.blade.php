@@ -116,7 +116,7 @@
             @endif
             @endcan
 
-            @can('request-event')
+            @can('center-admin')
                 <li class="nav-item">
                     <a href="{{route('admin.event.create')}}" class="nav-link">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16">
@@ -256,7 +256,7 @@
                                 </h6>
                                 @forelse (auth()->guard('admin')->user()->unreadNotifications as $noti)
                                 <a class="dropdown-item d-flex align-items-center unreadNotification" data-notificationId="{{$noti->id}}"
-                                    data-notificationUrl="{{$noti->data['url']}}" href="">
+                                    data-notificationUrl="{{$noti->data['url'] ?? ''}}" href="">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-primary">
                                             <i class="fas fa-file-alt text-white"></i>
@@ -355,6 +355,16 @@
 
                 <!-- Begin Page Content -->
                 <div class="container-fluid">
+                    @if (session('error'))
+                        <div class="alert alert-success">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+                    @if (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
                     @yield('content')
                     <!-- Page Heading -->
 
@@ -611,7 +621,7 @@
     item.addEventListener('click', (event) => {
         event.preventDefault()
         const notificationId = item.dataset.notificationid;
-        const notificationUrl = item.dataset.notificationurl;
+        const notificationUrl = item.dataset.notificationurl == "" ? window.location.href : item.dataset.notificationurl ;
       
         const token = $('meta[name="csrf-token"]').attr('content');
 
@@ -628,7 +638,10 @@ $.ajax({
     }),
     dataType: 'json',
     success: function(data) {
-        window.location.href=data
+        console.log('data :>> ', data);
+        if(data != {} || Object.keys(data).length > 0){
+            window.location.href=data
+        }
     },
     error: function(error) {
         alert(error.responseText);

@@ -44,7 +44,7 @@ class BloodRequestCompleted extends Notification implements ShouldQueue
         try {
             return (new MailMessage)
                     ->line('blood request comleted.')
-                    ->action('Notification Action', "/blood-request/{$this->bloodRequest->id}")
+                    ->action('Notification Action', "http://localhost:8080/blood-request")
                     ->line("your request was resolve by {$this->admin->name} at 
                     {$this->bloodRequest->center->name} center");
    
@@ -62,8 +62,7 @@ class BloodRequestCompleted extends Notification implements ShouldQueue
     {
         return [
             'message' => "your request was resolve by {$this->admin->name} 
-                         at {$this->bloodRequest->center->name}",
-            'url' => "/blood-request/{$this->bloodRequest->id}",
+                         at {$this->bloodRequest->center->name} check you email for more data",
         ];
     }
 }

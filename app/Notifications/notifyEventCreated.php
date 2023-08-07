@@ -42,7 +42,7 @@ class notifyEventCreated extends Notification  implements ShouldQueue
                                     {$this->event->start_date} to {$this->event->end_date}"));
         return (new MailMessage)
             ->line($message)
-            ->action('click here to see more details', "/event/{$this->event->id}")
+            ->action('click here to see more details', "http://localhost:8080/event/{$this->event->id}")
             ->line('Thank you for using our application!');
     }
     /**
@@ -55,7 +55,7 @@ class notifyEventCreated extends Notification  implements ShouldQueue
         $centers = implode(',', $this->event->centers()->get()->pluck('name')->toArray());
         return [
             'message' => "new event was created at {$centers} from {$this->event->start_date}
-                     to {$this->event->end_date}",
+                     to {$this->event->end_date}, check you email for more data",
             'url' => "/event/{$this->event->id}",
         ];
     }

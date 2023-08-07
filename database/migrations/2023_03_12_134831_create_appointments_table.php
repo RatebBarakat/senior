@@ -14,7 +14,8 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnDelete();
+            $table->foreignId('admin_id')->nullable()->constrained('admins')->cascadeOnDelete();
             $table->foreignId('center_id')->constrained('donation_centers')->cascadeOnDelete();
             $table->enum('status',['complete','scheduled'])->default('scheduled');
             $table->date('date')->index();

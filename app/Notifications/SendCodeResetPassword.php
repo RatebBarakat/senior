@@ -2,25 +2,26 @@
 
 namespace App\Notifications;
 
-use App\Models\Admin;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\URL;
 
-class NotifyAdminPassword extends Notification implements ShouldQueue
+class SendCodeResetPassword extends Notification
 {
     use Queueable;
 
-    private Admin $admin;
-    private string $token;
-
+    protected $notifiable;
+    protected $token;
     /**
      * Create a new notification instance.
      */
-    public function __construct(Admin $admin,string $token)
+    public function __construct($notifiable,$token)
     {
-        $this->admin = $admin;
+        $this->notifiable = $notifiable;
         $this->token = $token;
     }
 
@@ -39,11 +40,19 @@ class NotifyAdminPassword extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $role = $this->admin->role ? $this->admin->role->name : 'admin';
+        $url = $this->getUrl();
         return (new MailMessage)
-                    ->line("set your account password as {$role}")
-                    ->action('click here ', route('admin.setPassword',[$this->admin->id,$this->token]))
+                    ->line('reset your password')
+                    ->action('Notification Action', $url)
                     ->line('Thank you for using our application!');
+    }
+
+    private function getUrl(){
+        $expires = Carbon::now()->addMinutes(Config::get('auth.verification.expire', 60));
+        $email = $this->notifiable->getEmailForVerification();
+
+        $url = route('changePassword.show', [$this->token]);
+        return $url;
     }
 
     /**
