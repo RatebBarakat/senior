@@ -18,6 +18,7 @@
 - Laravel
 - Livewire
 - API
+- Vue js [link here](https://github.com/RatebBarakat/senior-front)
 
 ## Authentication and Authorization
 
